@@ -20,6 +20,8 @@ Then visit http://localhost:3000/ in your browser.
   X-Frame-Options headers, and so forth).
 * Configured with an appcache manifest to allow a mobile
   browser to access content offline.
+* Blocking third-party tracking services without browser
+  configuration.
 
 ## References
 
