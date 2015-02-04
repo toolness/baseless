@@ -109,7 +109,7 @@ function proxify(url, res, next) {
         return EXT_HANDLERS[ext](url, body, res, next);
       });
 
-    res.type(type);
+    res.status(proxyRes.statusCode).type(type);
     proxyRes.pipe(res);
   });
 }
