@@ -1,4 +1,5 @@
 var fs = require('fs');
+var urlModule = require('url');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var crypto = require('crypto');
@@ -7,7 +8,7 @@ var request = require('request');
 var async = require('async');
 
 var CACHE_DIR = __dirname + '/cache';
-var MAX_KEY_LEN = 80;
+var MAX_FILENAME_LEN = 80;
 
 if (!fs.existsSync(CACHE_DIR))
   fs.mkdirSync(CACHE_DIR);
@@ -15,14 +16,20 @@ if (!fs.existsSync(CACHE_DIR))
 var urlQueues = {};
 
 function CachedRequest(url) {
+  var parsed = urlModule.parse(url);
+  var filename = parsed.pathname.slice(1).replace(/\//g, '_');
+  var hash = crypto.createHash('md5');
+
   this.url = url;
-  this.key = encodeURIComponent(url);
-  if (this.key.length > MAX_KEY_LEN) {
-    var hash = crypto.createHash('md5');
-    hash.update(url);
-    this.key = hash.digest('hex');
-  }
+
+  filename = encodeURIComponent(filename);
+  if (filename.length > MAX_FILENAME_LEN)
+    filename = filename.slice(0, -MAX_FILENAME_LEN);
+  hash.update(url);
+  this.key = parsed.hostname + '/' + filename + '-' + hash.digest('hex');
   this.keyPath = CACHE_DIR + '/' + this.key + '.json';
+  if (!fs.existsSync(CACHE_DIR + '/' + parsed.hostname))
+    fs.mkdirSync(CACHE_DIR + '/' + parsed.hostname);
 }
 
 util.inherits(CachedRequest, EventEmitter);
@@ -42,7 +49,7 @@ CachedRequest.prototype.cacheResponse = function(cb) {
     var type = proxyRes.headers['content-type'] ||
                'application/octet-stream';
     var ext = mime.extension(type);
-    var filename = key + '.content.' + ext;
+    var filename = key + '.c.' + ext;
     var contentPath = CACHE_DIR + '/' + filename;
 
     fs.writeFileSync(keyPath, JSON.stringify({
