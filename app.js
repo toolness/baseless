@@ -46,6 +46,7 @@ function alterHTML(baseURL, html, res, next) {
   $('style').each(function() {
     $(this).text(alterCSSString(baseURL, $(this).text(), true));
   });
+  $('script').remove();
 
   return res.type('text/html; charset=utf-8')
     .send(new Buffer($.html(), 'utf-8'));
