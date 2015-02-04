@@ -1,4 +1,17 @@
-Use cases:
+Currently this is just a server that can proxy all content
+from any website through a single origin. It's the beginning
+of a potential experiment, though.
+
+## Quick Start
+
+```
+npm install
+node app.js
+```
+
+Then visit http://localhost:3000/ in your browser.
+
+## Use cases
 
 * Configured as a browser's proxy server for accessing
   offline content.
@@ -8,7 +21,7 @@ Use cases:
 * Configured with an appcache manifest to allow a mobile
   browser to access content offline.
 
-References:
+## References
 
 * The [Webmaker Field Research Report - Bangladesh][bangladesh]
   mentions that data is slow and costs lots of money, so most
