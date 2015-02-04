@@ -86,8 +86,12 @@ function respond(req, cb) {
 function get(url) {
   var req = new CachedRequest(url);
 
-  if (!(url in urlQueues))
+  if (!(url in urlQueues)) {
     urlQueues[url] = async.queue(respond, 1);
+    urlQueues[url].drain = function() {
+      delete urlQueues[url];
+    };
+  }
 
   urlQueues[url].push(req);
 
