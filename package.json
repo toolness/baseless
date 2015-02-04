@@ -9,6 +9,7 @@
     "css": "~2.1.0",
     "iconv-lite": "~0.4.6",
     "mime": "~1.2.11",
+    "async": "0.9.0",
     "request": "~2.53.0"
   },
   "devDependencies": {},
