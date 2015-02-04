@@ -17,11 +17,10 @@ Then visit http://localhost:3000/ in your browser.
   offline content.
 * Accessing all content in a webpage via a single, unrestricted
   origin (bypassing same-origin security restrictions,
-  `X-Frame-Options` and `Content-Security-Policy` headers,
-  and so forth).
+  `X-Frame-Options`/CSP/CORS headers, and so forth).
 * Configured with an appcache manifest to allow a mobile
   browser to access content offline.
-* Blocking third-party tracking services without browser
+* Blocking third-party tracking services without requiring browser
   configuration.
 * Allowing anyone to localize any website without needing
   to ask for permission.
