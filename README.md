@@ -42,9 +42,12 @@ Then visit http://localhost:3000/ in your browser.
 * The [If the kids don't have wi-fi...][schoolbus] segment on
   Spark describes how strategically-parked school buses
   are delivering wi-fi to students that don't have it at home.
+* [Bug 1036975][], "Content Security Policy breaks Webmaker's
+  X-Ray Goggles"
 
 <!-- Links -->
 
   [bangladesh]: https://webmaker-dist.s3.amazonaws.com/reports/bangladesh.pdf
   [cuba]: http://www.cbc.ca/radio/spark/273-school-bus-wi-fi-cuba-s-alternative-internet-capitalism-2-0-and-more-1.2928720/cuba-s-underground-alternative-to-the-internet-1.2928731
   [schoolbus]: http://www.cbc.ca/radio/spark/273-school-bus-wi-fi-cuba-s-alternative-internet-capitalism-2-0-and-more-1.2928720/if-the-kids-don-t-have-wi-fi-the-school-bus-will-it-bring-it-to-them-1.2928738
+  [Bug 1036975]: https://bugzilla.mozilla.org/show_bug.cgi?id=1036975
