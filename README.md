@@ -25,6 +25,7 @@ Then visit http://localhost:3000/ in your browser.
   configuration.
 * Allowing anyone to localize any website without needing
   to ask for permission.
+* Creating "standalone" X-ray Goggles remixes.
 
 ## References
 
