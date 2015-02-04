@@ -27,16 +27,15 @@ function CachedRequest(url) {
 
 util.inherits(CachedRequest, EventEmitter);
 
-CachedRequest.prototype.sendResponse = function() {
-  var metadata = JSON.parse(fs.readFileSync(this.keyPath));
-  var contentPath = CACHE_DIR + '/' + metadata.filename;
-  var response = fs.createReadStream(contentPath);
-  response.statusCode = metadata.statusCode;
-  response.headers = metadata.headers;
-  this.emit('response', response);
+CachedRequest.prototype.isResponseCached = function() {
+  return fs.existsSync(this.keyPath);
 };
 
-function cacheEntry(url, key, keyPath, cb) {
+CachedRequest.prototype.cacheResponse = function(cb) {
+  var url = this.url;
+  var key = this.key;
+  var keyPath = this.keyPath;
+
   var proxyReq = request.get(url);
 
   proxyReq.on('response', function(proxyRes) {
@@ -59,14 +58,23 @@ function cacheEntry(url, key, keyPath, cb) {
   }).on('error', cb);
 
   return proxyReq;
-}
+};
+
+CachedRequest.prototype.sendResponse = function() {
+  var metadata = JSON.parse(fs.readFileSync(this.keyPath));
+  var contentPath = CACHE_DIR + '/' + metadata.filename;
+  var response = fs.createReadStream(contentPath);
+  response.statusCode = metadata.statusCode;
+  response.headers = metadata.headers;
+  this.emit('response', response);
+};
 
 function respond(req, cb) {
-  if (fs.existsSync(req.keyPath)) {
+  if (req.isResponseCached()) {
     req.sendResponse();
     cb(null);
   } else {
-    cacheEntry(req.url, req.key, req.keyPath, function(err) {
+    req.cacheResponse(function(err) {
       cb(null);
       if (err)
         return req.emit('error', err);
