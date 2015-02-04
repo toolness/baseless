@@ -22,7 +22,7 @@ function proxiedURL(url, baseURL) {
     return url;
   if (baseURL)
     url = urlModule.resolve(baseURL, url);
-  return '/?url=' + encodeURIComponent(url);
+  return '/proxy?url=' + encodeURIComponent(url);
 }
 
 function alterHTML(baseURL, html, res, next) {
@@ -114,19 +114,23 @@ function proxify(url, res, next) {
   });
 }
 
-app.get('/', function(req, res, next) {
+app.get('/proxy', function(req, res, next) {
+  if (!req.query.url)
+    return res.status(400).send("url parameter required");
+
   res.set('Content-Security-Policy', [
     "default-src 'self'",
     "script-src 'none'",
     "style-src 'unsafe-inline' 'self'",
     "img-src 'self' data:"
   ].join('; '));
-  if (req.query.url) {
-    return proxify(req.query.url, res, next);
-  } else {
-    return fs.createReadStream(__dirname + '/index.html')
-      .pipe(res.type('text/html'));
-  }
+
+  return proxify(req.query.url, res, next);
+});
+
+app.get('/', function(req, res, next) {
+  return fs.createReadStream(__dirname + '/index.html')
+    .pipe(res.type('text/html'));
 });
 
 app.listen(PORT, function() {
