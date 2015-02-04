@@ -1,6 +1,6 @@
 Currently this is just a server that can proxy all content
 from any website through a single origin. It's the beginning
-of a potential experiment, though.
+of a potential experiment in offline webmaking, though.
 
 ## Quick Start
 
