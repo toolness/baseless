@@ -123,8 +123,8 @@ app.get('/', function(req, res, next) {
   if (req.query.url) {
     return proxify(req.query.url, res, next);
   } else {
-    return res.type('text/html')
-      .send(fs.readFileSync('index.html'));
+    return fs.createReadStream(__dirname + '/index.html')
+      .pipe(res.type('text/html'));
   }
 });
 
