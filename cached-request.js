@@ -46,6 +46,7 @@ CachedRequest.prototype.cacheResponse = function(cb) {
     var contentPath = CACHE_DIR + '/' + filename;
 
     fs.writeFileSync(keyPath, JSON.stringify({
+      url: url,
       statusCode: proxyRes.statusCode,
       headers: proxyRes.headers,
       filename: filename
