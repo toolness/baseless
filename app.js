@@ -15,10 +15,9 @@ app.get('/proxy', function(req, res, next) {
     return res.status(400).send("url parameter required");
 
   res.set('Content-Security-Policy', [
-    "default-src 'self'",
+    "default-src 'self' data:",
     "script-src 'none'",
-    "style-src 'unsafe-inline' 'self'",
-    "img-src 'self' data:"
+    "style-src 'unsafe-inline' 'self'"
   ].join('; '));
 
   return proxifier.proxify(req.query.url, res, next);
