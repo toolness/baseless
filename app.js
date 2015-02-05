@@ -104,6 +104,14 @@ function proxify(url, res, next) {
                'application/octet-stream';
     var ext = mime.extension(type);
 
+    if (proxyRes.headers['location'] && proxyRes.statusCode > 300 &&
+        proxyRes.statusCode < 304) {
+      return res.redirect(
+        proxyRes.statusCode,
+        proxiedURL(proxyRes.headers['location'], url)
+      );
+    }
+
     if (ext in EXT_HANDLERS)
       return getBody(type, 'utf-8', proxyRes, function(err, body) {
         if (err) return next(err);

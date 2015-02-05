@@ -43,7 +43,10 @@ CachedRequest.prototype.cacheResponse = function(cb) {
   var key = this.key;
   var keyPath = this.keyPath;
 
-  var proxyReq = request.get(url);
+  var proxyReq = request.get({
+    url: url,
+    followRedirect: false
+  });
 
   proxyReq.on('response', function(proxyRes) {
     var type = proxyRes.headers['content-type'] ||
