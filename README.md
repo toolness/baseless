@@ -26,6 +26,7 @@ Then visit http://localhost:3000/ in your browser.
   to ask for permission.
 * Creating "standalone" X-ray Goggles remixes.
 * Throttling (e.g. for net neutrality simulation)
+* Making browsing collaborative, e.g. using TogetherJS
 * Doing things that addons or bookmarklets normally do, but on
   the proxy-side, e.g.
   * parental controls
