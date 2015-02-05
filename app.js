@@ -24,7 +24,7 @@ if (USERPASS.length == 2)
         user.pass != USERPASS[1]) {
       res.set('WWW-Authenticate',
               'Basic realm=Authorization Required');
-      return res.send(401);
+      return res.sendStatus(401);
     }
 
     next();
