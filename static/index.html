@@ -11,7 +11,9 @@ html, body, .browser {
 
 .urlbar form {
   display: flex;
+  display: -webkit-flex;
   align-items: center;
+  -webkit-align-items: center;
   background: #e3eaee; /* makerstrap @lightgrey */
 }
 
@@ -21,15 +23,19 @@ html, body, .browser {
 
 .urlbar form > input[name=url] {
   flex-grow: 1;
+  -webkit-flex-grow: 1;
 }
 
 .browser {
   display: flex;
+  display: -webkit-flex;
   flex-direction: column;
+  -webkit-flex-direction: column;
 }
 
 .browser > .content {
   flex-grow: 1;
+  -webkit-flex-grow: 1;
   position: relative;
 }
 
