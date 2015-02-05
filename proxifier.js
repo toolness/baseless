@@ -130,15 +130,15 @@ Proxifier.prototype.proxify = function(url, res, next) {
   });
 };
 
-Proxifier.prototype.proxifyFormSubmission = function(req, res, next) {
-  if (!req.query.proxy_originalAction)
-    return res.status(400).send("proxy_originalAction required");
+Proxifier.prototype.getFormSubmitRedirect = function(req) {
+  if (!req.query.proxy_originalAction) return null;
 
   var urlInfo = urlModule.parse(req.query.proxy_originalAction);
 
   delete urlInfo.search;
   urlInfo.query = _.omit(req.query, 'proxy_originalAction');
-  return this.proxify(urlModule.format(urlInfo), res, next);
+
+  return urlModule.format(urlInfo);
 };
 
 Proxifier.prototype.EXT_HANDLERS = {

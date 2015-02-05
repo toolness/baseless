@@ -65,13 +65,13 @@ function gotoURL(url) {
 
   if (query.url == url) return;
 
-  query.url = url;
+  query.url = encodeURIComponent(url);
   window.location.hash = '#' + querystring.stringify(query);
 }
 
 function getCurrentURL() {
   var query = querystring.parse(window.location.hash.slice(1));
-  return query.url || '';
+  return query.url ? decodeURIComponent(query.url) : '';
 }
 
 function onHashChange() {

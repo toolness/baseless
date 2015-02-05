@@ -47,7 +47,10 @@ app.get('/proxy', function(req, res, next) {
 });
 
 app.get('/proxy/submit', function(req, res, next) {
-  return proxifier.proxifyFormSubmission(req, res, next);
+  var url = proxifier.getFormSubmitRedirect(req);
+
+  if (!url) return res.sendStatus(400);
+  return res.redirect('/proxy?url=' + encodeURIComponent(url));
 });
 
 app.get('/js/bundle.js', function(req, res, next) {
