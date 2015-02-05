@@ -42,7 +42,7 @@ html, body, .browser {
   border: none;
 }
 </style>
-<title>Baseless</title>
+<title>Baseless Browser</title>
 <div class="browser">
   <div class="urlbar">
     <form action="/proxy">
@@ -81,9 +81,11 @@ function onHashChange() {
   var iframe = content.childNodes[0];
   var proxiedURL = urls.rewriteURL(url);
 
+  document.title = url || 'Baseless Browser';
+
   if (url) {
     if (iframe) {
-      if (iframe.getAttribute('src') == proxiedURL)
+      if (urls.extractURL(iframe.contentWindow.location.href) == url)
         return;
       content.removeChild(iframe);
     }
@@ -101,28 +103,8 @@ function onHashChange() {
 
     if (currentURL && expectedURL && currentURL != expectedURL)
       gotoURL(currentURL);
-
-    cWin.addEventListener('click', onContentClick, true);
   });
   content.appendChild(iframe);
-}
-
-function onContentClick(e) {
-  var el = e.target;
-
-  if (e.button != 0 || e.ctrlKey || e.shiftKey ||
-      e.altKey || e.metaKey)
-    return;
-
-  while (el) {
-    if (el.nodeName == 'A' && el.hasAttribute('href')) {
-      var url = urls.extractURL(el.getAttribute('href'));
-      if (!url) return;
-      e.preventDefault();
-      gotoURL(url);
-    }
-    el = el.parentNode;
-  }
 }
 
 urlbarForm.addEventListener('submit', function(e) {
