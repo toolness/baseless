@@ -78,14 +78,30 @@ function onHashChange() {
   var url = getCurrentURL();
   if (urlbarForm.url.value != url)
     urlbarForm.url.value = url;
-  if (content.childNodes.length)
-    content.removeChild(content.childNodes[0]);
-  if (!url)
+  var iframe = content.childNodes[0];
+  var proxiedURL = urls.rewriteURL(url);
+
+  if (url) {
+    if (iframe) {
+      if (iframe.getAttribute('src') == proxiedURL)
+        return;
+      content.removeChild(iframe);
+    }
+  } else {
+    if (iframe) content.removeChild(iframe);
     return;
-  var iframe = document.createElement('iframe');
-  iframe.setAttribute('src', urls.rewriteURL(url));
+  }
+
+  iframe = document.createElement('iframe');
+  iframe.setAttribute('src', proxiedURL);
   iframe.addEventListener('load', function() {
     var cWin = iframe.contentWindow;
+    var currentURL = urls.extractURL(cWin.location.href);
+    var expectedURL = getCurrentURL();
+
+    if (currentURL && expectedURL && currentURL != expectedURL)
+      gotoURL(currentURL);
+
     cWin.addEventListener('click', onContentClick, true);
   });
   content.appendChild(iframe);
