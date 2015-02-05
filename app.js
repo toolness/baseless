@@ -1,4 +1,3 @@
-var fs = require('fs');
 var express = require('express');
 var Proxifier = require('./proxifier');
 var cachedRequest = require('./cached-request');
@@ -33,10 +32,7 @@ app.get('/proxy/submit', function(req, res, next) {
   return proxifier.proxifyFormSubmission(req, res, next);
 });
 
-app.get('/', function(req, res, next) {
-  return fs.createReadStream(__dirname + '/index.html')
-    .pipe(res.type('text/html'));
-});
+app.use(express.static(__dirname + '/static'));
 
 app.listen(PORT, function() {
   console.log("listening on port " + PORT);
