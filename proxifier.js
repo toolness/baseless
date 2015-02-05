@@ -1,4 +1,5 @@
 var urlModule = require('url');
+var _ = require('underscore');
 var cssModule = require('css');
 var iconv = require('iconv-lite');
 var cheerio = require('cheerio');
@@ -30,6 +31,7 @@ function getBody(type, defaultType, stream, cb) {
 function Proxifier(options) {
   this.rewriteURL = options.rewriteURL;
   this.request = options.request;
+  this.formSubmitURL = options.formSubmitURL;
 }
 
 Proxifier.prototype.proxiedURL = function(url, baseURL) {
@@ -58,6 +60,13 @@ Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
   rewriteAttrURL('href');
   rewriteAttrURL('xlink:href');
 
+  $('form').each(function() {
+    var originalAction = urlModule.resolve(baseURL, $(this).attr('action') || '');
+    var input = $('<input type="hidden" name="proxy_originalAction">');
+    input.attr('value', originalAction);
+    $(this).append(input);
+    $(this).attr('action', self.formSubmitURL);
+  });
   $('[style]').each(function() {
     var style = $(this).attr('style');
     $(this).attr('style', self.alterCSSString(baseURL, style));
@@ -119,7 +128,18 @@ Proxifier.prototype.proxify = function(url, res, next) {
     res.status(proxyRes.statusCode).type(type);
     proxyRes.pipe(res);
   });
-}
+};
+
+Proxifier.prototype.proxifyFormSubmission = function(req, res, next) {
+  if (!req.query.proxy_originalAction)
+    return res.status(400).send("proxy_originalAction required");
+
+  var urlInfo = urlModule.parse(req.query.proxy_originalAction);
+
+  delete urlInfo.search;
+  urlInfo.query = _.omit(req.query, 'proxy_originalAction');
+  return this.proxify(urlModule.format(urlInfo), res, next);
+};
 
 Proxifier.prototype.EXT_HANDLERS = {
   'html': Proxifier.prototype.alterHTML,
