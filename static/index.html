@@ -1,21 +1,105 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>Baseless</title>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" rel="stylesheet">
+<link rel="stylesheet" href="/vendor/makerstrap.min.css">
+<link rel="stylesheet" href="/vendor/font-awesome/css/font-awesome.css">
 <style>
-* {
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
+html, body, .browser {
+  height: 100%;
+
 }
 
-#url {
-  display: block;
+.urlbar form {
+  display: flex;
+  align-items: center;
+  background: #e3eaee; /* makerstrap @lightgrey */
+}
+
+.urlbar form > * {
+  margin: 10px;
+}
+
+.urlbar form > input[name=url] {
+  flex-grow: 1;
+}
+
+.browser {
+  display: flex;
+  flex-direction: column;
+}
+
+.browser > .content {
+  flex-grow: 1;
+  position: relative;
+}
+
+.browser > .content > iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  margin-bottom: 1em;
+  height: 100%;
+  border: none;
 }
 </style>
-<p>Give me a URL.</p>
-<form action="/proxy">
-  <input id="url" type="url" name="url" placeholder="http://">
-  <button type="submit">Submit</button>
-</form>
+<title>Baseless</title>
+<div class="browser">
+  <div class="urlbar">
+    <form action="/proxy">
+      <input spellcheck="false" type="url" name="url" class="form-control" placeholder="http://">
+      <button type="submit" class="btn btn-primary">Go <i class="fa fa-chevron-right"></i></button>
+    </form>
+  </div>
+  <div class="content"></div>
+</div>
+<script src="/js/bundle.js"></script>
+<script>
+var urls = require('./urls');
+var urlbarForm = document.querySelector('.urlbar form');
+var content = document.querySelector('.content');
+
+function gotoURL(url) {
+  window.location.hash = '#' + encodeURIComponent(url);
+}
+
+function onHashChange() {
+  var url = decodeURIComponent(window.location.hash.slice(1));
+
+  if (urlbarForm.url.value != url)
+    urlbarForm.url.value = url;
+  if (content.childNodes.length)
+    content.removeChild(content.childNodes[0]);
+  if (!url)
+    return;
+  var iframe = document.createElement('iframe');
+  iframe.setAttribute('src', urls.rewriteURL(url));
+  iframe.addEventListener('load', function() {
+    var cWin = iframe.contentWindow;
+    cWin.addEventListener('click', onContentClick, true);
+  });
+  content.appendChild(iframe);
+}
+
+function onContentClick(e) {
+  var el = e.target;
+  while (el) {
+    if (el.nodeName == 'A' && el.hasAttribute('href')) {
+      var url = urls.extractURL(el.getAttribute('href'));
+      if (!url) return;
+      e.preventDefault();
+      gotoURL(url);
+    }
+    el = el.parentNode;
+  }
+}
+
+urlbarForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  gotoURL(urlbarForm.url.value);
+});
+
+window.addEventListener('load', function() {
+  window.addEventListener('hashchange', onHashChange);
+  onHashChange();
+});
+</script>
