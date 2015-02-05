@@ -82,6 +82,11 @@ function onHashChange() {
 
 function onContentClick(e) {
   var el = e.target;
+
+  if (e.button != 0 || e.ctrlKey || e.shiftKey ||
+      e.altKey || e.metaKey)
+    return;
+
   while (el) {
     if (el.nodeName == 'A' && el.hasAttribute('href')) {
       var url = urls.extractURL(el.getAttribute('href'));
