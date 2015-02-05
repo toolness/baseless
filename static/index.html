@@ -48,23 +48,34 @@ html, body, .browser {
     <form action="/proxy">
       <input spellcheck="false" type="url" name="url" class="form-control" placeholder="http://">
       <button type="submit" class="btn btn-primary">Go <i class="fa fa-chevron-right"></i></button>
+      <button id="togetherjs" class="btn btn-default">Collaborate</button>
     </form>
   </div>
   <div class="content"></div>
 </div>
 <script src="/js/bundle.js"></script>
 <script>
+var querystring = require('querystring');
 var urls = require('./urls');
 var urlbarForm = document.querySelector('.urlbar form');
 var content = document.querySelector('.content');
 
 function gotoURL(url) {
-  window.location.hash = '#' + encodeURIComponent(url);
+  var query = querystring.parse(window.location.hash.slice(1));
+
+  if (query.url == url) return;
+
+  query.url = url;
+  window.location.hash = '#' + querystring.stringify(query);
+}
+
+function getCurrentURL() {
+  var query = querystring.parse(window.location.hash.slice(1));
+  return query.url || '';
 }
 
 function onHashChange() {
-  var url = decodeURIComponent(window.location.hash.slice(1));
-
+  var url = getCurrentURL();
   if (urlbarForm.url.value != url)
     urlbarForm.url.value = url;
   if (content.childNodes.length)
@@ -107,4 +118,30 @@ window.addEventListener('load', function() {
   window.addEventListener('hashchange', onHashChange);
   onHashChange();
 });
+
+// TogetherJS integration
+
+document.getElementById("togetherjs").addEventListener('click', function(e) {
+  if (typeof(TogetherJS) == 'undefined')
+    return alert("TogetherJS is not available, please try later.");
+  TogetherJS(this);
+});
+
+window.addEventListener('hashchange', function() {
+  if (typeof(TogetherJS) == 'undefined' || !TogetherJS.running)
+    return;
+
+  TogetherJS.send({type: 'urlChange', url: getCurrentURL()});
+});
+
+TogetherJSConfig_hub_on = {
+  'urlChange': function(msg) {
+    gotoURL(msg.url);
+  },
+  'togetherjs.hello': function(msg) {
+    if (!msg.sameUrl) return;
+    TogetherJS.send({type: 'urlChange', url: getCurrentURL()});
+  }
+};
 </script>
+<script src="//togetherjs.com/togetherjs-min.js" async></script>
