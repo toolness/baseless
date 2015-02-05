@@ -25,6 +25,7 @@ Then visit http://localhost:3000/ in your browser.
 * Allowing anyone to localize any website without needing
   to ask for permission.
 * Creating "standalone" X-ray Goggles remixes.
+* Throttling (e.g. for net neutrality simulation)
 * Doing things that addons or bookmarklets normally do, but on
   the proxy-side, e.g.
   * parental controls
