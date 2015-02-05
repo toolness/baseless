@@ -4,7 +4,11 @@ var express = require('express');
 
 var PORT = process.env.PORT || 3000;
 var app = express();
-var proxifier = new Proxifier();
+var proxifier = new Proxifier({
+  rewriteURL: function(url) {
+    return '/proxy?url=' + encodeURIComponent(url);
+  }
+});
 
 app.get('/proxy', function(req, res, next) {
   if (!req.query.url)

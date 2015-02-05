@@ -29,7 +29,8 @@ function getBody(type, defaultType, stream, cb) {
   stream.on('error', cb);
 }
 
-function Proxifier() {
+function Proxifier(options) {
+  this.rewriteURL = options.rewriteURL;
 }
 
 Proxifier.prototype.proxiedURL = function(url, baseURL) {
@@ -40,7 +41,7 @@ Proxifier.prototype.proxiedURL = function(url, baseURL) {
     return url;
   if (baseURL)
     url = urlModule.resolve(baseURL, url);
-  return '/proxy?url=' + encodeURIComponent(url);
+  return this.rewriteURL(url);
 };
 
 Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
