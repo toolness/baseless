@@ -1,13 +1,15 @@
 var fs = require('fs');
-var Proxifier = require('./proxifier');
 var express = require('express');
+var Proxifier = require('./proxifier');
+var cachedRequest = require('./cached-request');
 
 var PORT = process.env.PORT || 3000;
 var app = express();
 var proxifier = new Proxifier({
   rewriteURL: function(url) {
     return '/proxy?url=' + encodeURIComponent(url);
-  }
+  },
+  request: cachedRequest
 });
 
 app.get('/proxy', function(req, res, next) {

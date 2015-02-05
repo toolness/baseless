@@ -1,8 +1,6 @@
 var urlModule = require('url');
 var cssModule = require('css');
 var iconv = require('iconv-lite');
-//var request = require('request');
-var request = require('./cached-request');
 var cheerio = require('cheerio');
 var mime = require('mime');
 
@@ -31,6 +29,7 @@ function getBody(type, defaultType, stream, cb) {
 
 function Proxifier(options) {
   this.rewriteURL = options.rewriteURL;
+  this.request = options.request;
 }
 
 Proxifier.prototype.proxiedURL = function(url, baseURL) {
@@ -96,7 +95,7 @@ Proxifier.prototype.alterCSS = function(baseURL, css, res, next) {
 
 Proxifier.prototype.proxify = function(url, res, next) {
   var self = this;
-  var proxyReq = request.get(url);
+  var proxyReq = self.request.get(url);
 
   proxyReq.on('response', function(proxyRes) {
     var type = proxyRes.headers['content-type'] ||
