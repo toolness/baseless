@@ -1,4 +1,5 @@
 var express = require('express');
+var basicAuth = require('basic-auth');
 var browserify = require('browserify');
 var urls = require('./urls');
 var Proxifier = require('./proxifier');
@@ -6,6 +7,7 @@ var cachedRequest = require('./cached-request');
 
 var PORT = process.env.PORT || 3000;
 var DEBUG = 'DEBUG' in process.env;
+var USERPASS = (process.env.USERPASS || '').split(':');
 
 var bundlejs;
 var app = express();
@@ -14,6 +16,19 @@ var proxifier = new Proxifier({
   formSubmitURL: '/proxy/submit',
   request: cachedRequest
 });
+
+if (USERPASS.length == 2)
+  app.use(function(req, res, next) {
+    var user = basicAuth(req);
+    if (!user || user.name != USERPASS[0] ||
+        user.pass != USERPASS[1]) {
+      res.set('WWW-Authenticate',
+              'Basic realm=Authorization Required');
+      return res.send(401);
+    }
+
+    next();
+  });
 
 app.use('/proxy', function(req, res, next) {
   res.set('Content-Security-Policy', [
