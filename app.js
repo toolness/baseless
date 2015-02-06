@@ -74,6 +74,12 @@ app.use('/vendor/webxray',
 app.use('/vendor/webxray/src',
         express.static(__dirname + '/webxray-master/src'));
 
+app.use(function(err, req, res, next) {
+  console.log(err.stack);
+
+  return res.type("text/plain").status(500).send(err.stack);
+});
+
 app.listen(PORT, function() {
   console.log("listening on port " + PORT);
 });

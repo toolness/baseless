@@ -139,7 +139,7 @@ Proxifier.prototype.proxify = function(url, res, next) {
 
     res.status(proxyRes.statusCode).type(type);
     proxyRes.pipe(res);
-  });
+  }).on('error', next);
 };
 
 Proxifier.prototype.getFormSubmitRedirect = function(req) {
