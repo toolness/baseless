@@ -96,12 +96,13 @@ Proxifier.prototype.alterCSSString = function(baseURL, css, noPrettify, e) {
     } catch (e) {}
   }
   css = css.replace(/url\(([^)]+)\)/g, function(matchedStr, url) {
+    url = unquote(url)
     e.emit('linkedResource', {
       baseURL: baseURL,
       url: url,
       type: 'css'
     });
-    return 'url(' + self.proxiedURL(unquote(url), baseURL) + ')';
+    return 'url(' + self.proxiedURL(url, baseURL) + ')';
   });
 
   return css;
