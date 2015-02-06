@@ -33,7 +33,7 @@ if (USERPASS.length == 2)
 app.use('/proxy', function(req, res, next) {
   res.set('Content-Security-Policy', [
     "default-src 'self' data:",
-    "script-src 'none'",
+    "script-src 'self'",
     "style-src 'unsafe-inline' 'self'"
   ].join('; '));
   next();
@@ -69,6 +69,10 @@ app.get('/js/bundle.js', function(req, res, next) {
 });
 
 app.use(express.static(__dirname + '/static'));
+app.use('/vendor/webxray',
+        express.static(__dirname + '/webxray-master/static-files'));
+app.use('/vendor/webxray/src',
+        express.static(__dirname + '/webxray-master/src'));
 
 app.listen(PORT, function() {
   console.log("listening on port " + PORT);

@@ -55,6 +55,7 @@ html, body, .browser {
       <input spellcheck="false" type="url" name="url" class="form-control" placeholder="http://">
       <button type="submit" class="btn btn-primary">Go <i class="fa fa-chevron-right"></i></button>
       <button id="togetherjs" class="btn btn-default"><i class="fa fa-user-plus"></i> <span class="sr-only">Collaborate</span></button>
+      <button id="webxray" class="btn btn-default"><i class="fa fa-code"></i> <span class="sr-only">Goggles</span></button>
     </form>
   </div>
   <div class="content"></div>
@@ -80,11 +81,15 @@ function getCurrentURL() {
   return query.url ? decodeURIComponent(query.url) : '';
 }
 
+function getContentIframe() {
+  return content.childNodes[0] || null;
+}
+
 function onHashChange() {
   var url = getCurrentURL();
   if (urlbarForm.url.value != url)
     urlbarForm.url.value = url;
-  var iframe = content.childNodes[0];
+  var iframe = getContentIframe();
   var proxiedURL = urls.rewriteURL(url);
 
   document.title = url || 'Baseless Browser';
@@ -147,5 +152,21 @@ TogetherJSConfig_hub_on = {
     TogetherJS.send({type: 'urlChange', url: getCurrentURL()});
   }
 };
+
+// X-Ray Goggles integration
+
+document.getElementById("webxray").addEventListener('click', function(e) {
+  var iframe = getContentIframe();
+  var cWin = iframe && iframe.contentWindow;
+  var script;
+
+  if (!cWin) return;
+
+  script = cWin.document.createElement('script');
+  script.setAttribute('src', '/vendor/webxray/webxray.js');
+  script.setAttribute('class', 'webxray');
+  cWin.document.body.appendChild(script);
+  iframe.focus();
+});
 </script>
 <script src="//togetherjs.com/togetherjs-min.js" async></script>
