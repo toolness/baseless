@@ -52,6 +52,13 @@ Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
     var selector = '[' + attrName.replace(':', '\\:') + ']';
     $(selector).each(function() {
       var url = $(this).attr(attrName);
+      res.emit('linkedResource', {
+        baseURL: baseURL,
+        url: url,
+        type: 'html',
+        nodeName: this.name,
+        attribute: attrName
+      });
       $(this).attr(attrName, self.proxiedURL(url, baseURL));
     });
   };
@@ -69,10 +76,10 @@ Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
   });
   $('[style]').each(function() {
     var style = $(this).attr('style');
-    $(this).attr('style', self.alterCSSString(baseURL, style));
+    $(this).attr('style', self.alterCSSString(baseURL, style, false, res));
   });
   $('style').each(function() {
-    $(this).text(self.alterCSSString(baseURL, $(this).text(), true));
+    $(this).text(self.alterCSSString(baseURL, $(this).text(), true, res));
   });
   $('script').remove();
 
@@ -80,15 +87,20 @@ Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
     .send(new Buffer($.html(), 'utf-8'));
 }
 
-Proxifier.prototype.alterCSSString = function(baseURL, css, ignorePrettify) {
+Proxifier.prototype.alterCSSString = function(baseURL, css, noPrettify, e) {
   var self = this;
 
-  if (!ignorePrettify) {
+  if (!noPrettify) {
     try {
       css = cssModule.stringify(cssModule.parse(css));
     } catch (e) {}
   }
   css = css.replace(/url\(([^)]+)\)/g, function(matchedStr, url) {
+    e.emit('linkedResource', {
+      baseURL: baseURL,
+      url: url,
+      type: 'css'
+    });
     return 'url(' + self.proxiedURL(unquote(url), baseURL) + ')';
   });
 
@@ -96,7 +108,7 @@ Proxifier.prototype.alterCSSString = function(baseURL, css, ignorePrettify) {
 }
 
 Proxifier.prototype.alterCSS = function(baseURL, css, res, next) {
-  var css = this.alterCSSString(baseURL, css);
+  var css = this.alterCSSString(baseURL, css, false, res);
 
   return res.type('text/css; charset=utf-8')
     .send(new Buffer(css, 'utf-8'));
