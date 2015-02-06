@@ -88,22 +88,23 @@ function spider(options, cb) {
     visited[task.url] = true;
     getLinkedResources(task.url, function(err, r) {
       if (err) return cb(err);
-      if (task.ttl > 0) {
-        r.forEach(function(info) {
-          var url = normalizeURL(info.url, info.baseURL);
+      r.forEach(function(info) {
+        var url = normalizeURL(info.url, info.baseURL);
 
-          if (!/^https?:\/\//.test(url) ||
-              (url in visited) ||
-              (info.type == 'html' && info.nodeName == 'script')) {
-            return;
-          }
-          queue.push({
-            url: url,
-            ttl: info.type == 'redirect' ? task.ttl : task.ttl - 1
-          });
-          visited[url] = true;
+        if (task.ttl == 0 && info.type != 'redirect')
+          return;
+
+        if (!/^https?:\/\//.test(url) ||
+            (url in visited) ||
+            (info.type == 'html' && info.nodeName == 'script')) {
+          return;
+        }
+        queue.push({
+          url: url,
+          ttl: info.type == 'redirect' ? task.ttl : task.ttl - 1
         });
-      }
+        visited[url] = true;
+      });
       cb(null);
     });
   }, MAX_SIMULTANEOUS_REQUESTS);
