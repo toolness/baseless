@@ -1,6 +1,7 @@
 var urlModule = require('url');
 var util = require('util');
 var stream = require('stream');
+var _ = require('underscore');
 var async = require('async');
 
 var Proxifier = require('./proxifier');
@@ -41,6 +42,15 @@ FakeResponse.prototype._write = function(chunk, encoding, cb) {
   process.nextTick(cb);
 };
 
+function normalizeURL(url, baseURL) {
+  if (baseURL) url = urlModule.resolve(baseURL, url);
+
+  var urlObj = urlModule.parse(url);
+  return urlModule.format(_.extend(urlObj, {
+    hash: ''
+  }));
+}
+
 function getLinkedResources(url, cb) {
   var linkedResources = [];
   var res = new FakeResponse();
@@ -70,16 +80,18 @@ function getLinkedResources(url, cb) {
   proxifier.proxify(url, res, next);
 }
 
-function spider(initialURL, initialTTL, cb) {
+function spider(options, cb) {
   var MAX_SIMULTANEOUS_REQUESTS = 5;
   var visited = {};
   var queue = async.queue(function(task, cb) {
     console.log("retrieving " + task.url);
+    visited[task.url] = true;
     getLinkedResources(task.url, function(err, r) {
       if (err) return cb(err);
       if (task.ttl > 0) {
         r.forEach(function(info) {
-          var url = urlModule.resolve(info.baseURL, info.url);
+          var url = normalizeURL(info.url, info.baseURL);
+
           if (!/^https?:\/\//.test(url) ||
               (url in visited) ||
               (info.type == 'html' && info.nodeName == 'script')) {
@@ -98,15 +110,17 @@ function spider(initialURL, initialTTL, cb) {
 
   queue.drain = cb;
 
-  visited[initialURL] = true;
   queue.push({
-    url: initialURL,
-    ttl: initialTTL
+    url: normalizeURL(options.url),
+    ttl: options.ttl
   });
 }
 
 function main() {
-  spider('https://docs.djangoproject.com/en/1.7/', 1, function(err) {
+  spider({
+    url: 'https://docs.djangoproject.com/en/1.7/',
+    ttl: 1
+  }, function(err) {
     if (err) throw err;
     console.log("done");
   });
