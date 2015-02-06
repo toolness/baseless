@@ -1,6 +1,9 @@
 Currently this is just a server that can proxy all content
-from any website through a single origin. It's the beginning
-of a potential experiment in offline webmaking, though.
+from any website through a single origin, cache it for offline use,
+and allow users to activate the X-Ray Goggles on any page.
+
+It's the beginning of a more wide-ranging experiment in offline
+webmaking, though.
 
 ## Quick Start
 
