@@ -53,7 +53,7 @@ html, body, .browser {
 <div class="browser">
   <div class="urlbar">
     <form action="/proxy">
-      <input spellcheck="false" type="url" name="url" class="form-control" placeholder="http://">
+      <input spellcheck="false" type="text" name="url" class="form-control" placeholder="http://">
       <button type="submit" class="btn btn-primary">Go <i class="fa fa-chevron-right"></i></button>
       <button id="togetherjs" class="btn btn-default"><i class="fa fa-user-plus"></i> <span class="sr-only">Collaborate</span></button>
       <button id="webxray" class="btn btn-default"><i class="fa fa-code"></i> <span class="sr-only">Goggles</span></button>
@@ -121,6 +121,8 @@ function onHashChange() {
 
 urlbarForm.addEventListener('submit', function(e) {
   e.preventDefault();
+  if (!/^https?:\/\//i.test(urlbarForm.url.value))
+    urlbarForm.url.value = 'http://' + urlbarForm.url.value;
   gotoURL(urlbarForm.url.value);
 });
 
