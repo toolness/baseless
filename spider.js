@@ -90,18 +90,19 @@ function spider(options, cb) {
       if (err) return cb(err);
       r.forEach(function(info) {
         var url = normalizeURL(info.url, info.baseURL);
-
-        if (task.ttl == 0 && info.type != 'redirect')
-          return;
+        var ttl = task.ttl;
 
         if (!/^https?:\/\//.test(url) ||
             (url in visited) ||
             (info.type == 'html' && info.nodeName == 'script')) {
           return;
         }
+        if (info.type == 'html' && info.nodeName == 'a')
+          ttl--;
+        if (ttl < 0) return;
         queue.push({
           url: url,
-          ttl: info.type == 'redirect' ? task.ttl : task.ttl - 1
+          ttl: ttl
         });
         visited[url] = true;
       });
@@ -120,7 +121,7 @@ function spider(options, cb) {
 function main() {
   spider({
     url: 'https://docs.djangoproject.com/en/1.7/',
-    ttl: 1
+    ttl: 0
   }, function(err) {
     if (err) throw err;
     console.log("done");
