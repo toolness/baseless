@@ -1,10 +1,15 @@
 var urlModule = require('url');
+var _ = require('underscore');
 
 exports.rewriteURL = function(url) {
-  return '/proxy?url=' + encodeURIComponent(url);
+  var urlObj = urlModule.parse(url);
+  var hash = urlObj.hash || '';
+
+  url = urlModule.format(_.omit(urlObj, 'hash'));
+  return '/proxy?url=' + encodeURIComponent(url) + hash;
 };
 
 exports.extractURL = function(url) {
-  var info = urlModule.parse(url, true);
-  return info.query.url;
+  var urlObj = urlModule.parse(url, true);
+  return urlObj.query.url + (urlObj.hash || '');
 };
