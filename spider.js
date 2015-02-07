@@ -1,4 +1,5 @@
 var urlModule = require('url');
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var stream = require('stream');
 var _ = require('underscore');
@@ -7,8 +8,9 @@ var async = require('async');
 var Proxifier = require('./proxifier');
 var cachedRequest = require('./cached-request');
 
-function FakeResponse() {
-  stream.PassThrough.apply(this, arguments);
+function FakeResponse(url) {
+  stream.PassThrough.call(this);
+  this.url = url;
   this.on('pipe', function() {
     this.emit('doneSpidering');
   }.bind(this));
@@ -51,7 +53,7 @@ function normalizeURL(url, baseURL) {
 
 function getLinkedResources(url, cb) {
   var linkedResources = [];
-  var res = new FakeResponse();
+  var res = new FakeResponse(url);
   var next = function(err) {
     if (err) return cb(err);
   };
@@ -80,13 +82,16 @@ function getLinkedResources(url, cb) {
 }
 
 function spider(options, cb) {
+  var self = new EventEmitter();
   var MAX_SIMULTANEOUS_REQUESTS = 5;
   var visited = {};
   var queue = async.queue(function(task, cb) {
-    console.log("retrieving " + task.url);
     visited[task.url] = true;
     var res = getLinkedResources(task.url, function(err, r) {
-      if (err) return cb(err);
+      if (err) {
+        self.emit('error', err);
+        return cb(err);
+      }
       r.forEach(function(info) {
         var url = normalizeURL(info.url, info.baseURL);
         var ttl = task.ttl;
@@ -110,15 +115,19 @@ function spider(options, cb) {
       });
       cb(null);
     });
-    res.on('data', function() { /* Just drain the stream. */ });
+    self.emit('response', res);
   }, MAX_SIMULTANEOUS_REQUESTS);
 
-  queue.drain = cb;
+  queue.drain = function() {
+    self.emit('end');
+  };
 
   queue.push({
     url: normalizeURL(options.url),
     ttl: options.ttl
   });
+
+  return self;
 }
 
 function main() {
@@ -126,8 +135,10 @@ function main() {
     url: 'https://docs.djangoproject.com/en/1.7/',
     linkPrefix: 'https://docs.djangoproject.com/en/1.7/',
     ttl: 3
-  }, function(err) {
-    if (err) throw err;
+  }).on('response', function(res) {
+    console.log("retrieving " + res.url);
+    res.on('data', function() { /* Just drain the stream. */ });
+  }).on('end', function() {
     console.log("done");
   });
 }
