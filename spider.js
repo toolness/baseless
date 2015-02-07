@@ -20,6 +20,7 @@ FakeResponse.prototype.redirect = function(statusCode, url) {
   this.statusCode = statusCode;
   this.redirectURL = url;
   this.emit('doneSpidering');
+  this.end();
   return this;
 };
 
@@ -75,6 +76,7 @@ function getLinkedResources(url, cb) {
   });
 
   proxifier.proxify(url, res, next);
+  return res;
 }
 
 function spider(options, cb) {
@@ -83,7 +85,7 @@ function spider(options, cb) {
   var queue = async.queue(function(task, cb) {
     console.log("retrieving " + task.url);
     visited[task.url] = true;
-    getLinkedResources(task.url, function(err, r) {
+    var res = getLinkedResources(task.url, function(err, r) {
       if (err) return cb(err);
       r.forEach(function(info) {
         var url = normalizeURL(info.url, info.baseURL);
@@ -108,6 +110,7 @@ function spider(options, cb) {
       });
       cb(null);
     });
+    res.on('data', function() { /* Just drain the stream. */ });
   }, MAX_SIMULTANEOUS_REQUESTS);
 
   queue.drain = cb;
