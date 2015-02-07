@@ -8,13 +8,13 @@ var Proxifier = require('./proxifier');
 var cachedRequest = require('./cached-request');
 
 function FakeResponse() {
-  stream.Writable.apply(this, arguments);
+  stream.PassThrough.apply(this, arguments);
   this.on('pipe', function() {
     this.emit('done');
   }.bind(this));
 }
 
-util.inherits(FakeResponse, stream.Writable);
+util.inherits(FakeResponse, stream.PassThrough);
 
 FakeResponse.prototype.redirect = function(statusCode, url) {
   this.statusCode = statusCode;
@@ -36,10 +36,6 @@ FakeResponse.prototype.type = function(contentType) {
 FakeResponse.prototype.send = function() {
   this.emit('done');
   return this;
-};
-
-FakeResponse.prototype._write = function(chunk, encoding, cb) {
-  process.nextTick(cb);
 };
 
 function normalizeURL(url, baseURL) {
