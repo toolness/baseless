@@ -34,7 +34,7 @@ function Proxifier(options) {
   this.formSubmitURL = options.formSubmitURL;
 }
 
-Proxifier.prototype.proxiedURL = function(url, baseURL) {
+Proxifier.prototype.proxiedURL = function(url, baseURL, type) {
   if (!url) return '';
   var parsed = urlModule.parse(url);
   if (!(parsed.protocol === null || /^https?:/.test(parsed.protocol))) {
@@ -43,7 +43,7 @@ Proxifier.prototype.proxiedURL = function(url, baseURL) {
   }
   if (baseURL)
     url = urlModule.resolve(baseURL, url);
-  return this.rewriteURL(url);
+  return this.rewriteURL(url, baseURL, type);
 };
 
 Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
@@ -60,7 +60,7 @@ Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
         nodeName: this.name,
         attribute: attrName
       });
-      $(this).attr(attrName, self.proxiedURL(url, baseURL));
+      $(this).attr(attrName, self.proxiedURL(url, baseURL, 'html'));
     });
   };
 
@@ -103,7 +103,7 @@ Proxifier.prototype.alterCSSString = function(baseURL, css, noPrettify, e) {
       url: url,
       type: 'css'
     });
-    return 'url(' + self.proxiedURL(url, baseURL) + ')';
+    return 'url(' + self.proxiedURL(url, baseURL, 'css') + ')';
   });
 
   return css;
@@ -129,7 +129,7 @@ Proxifier.prototype.proxify = function(url, res, next) {
         proxyRes.statusCode < 304) {
       return res.redirect(
         proxyRes.statusCode,
-        self.proxiedURL(proxyRes.headers['location'], url)
+        self.proxiedURL(proxyRes.headers['location'], url, 'redirect')
       );
     }
 

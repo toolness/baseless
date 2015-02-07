@@ -28,14 +28,17 @@ function CachedRequest(url) {
   hash.update(url);
   this.key = parsed.hostname + '/' + filename + '-' + hash.digest('hex');
   this.keyPath = CACHE_DIR + '/' + this.key + '.json';
-  if (!fs.existsSync(CACHE_DIR + '/' + parsed.hostname))
-    fs.mkdirSync(CACHE_DIR + '/' + parsed.hostname);
+  this.keyDir = CACHE_DIR + '/' + parsed.hostname;
 }
 
 util.inherits(CachedRequest, EventEmitter);
 
 CachedRequest.prototype.isResponseCached = function() {
   return fs.existsSync(this.keyPath);
+};
+
+CachedRequest.prototype.getCachedResponseMetadata = function() {
+  return JSON.parse(fs.readFileSync(this.keyPath));
 };
 
 CachedRequest.prototype.cacheResponse = function(cb) {
@@ -47,6 +50,9 @@ CachedRequest.prototype.cacheResponse = function(cb) {
     url: url,
     followRedirect: false
   });
+
+  if (!fs.existsSync(this.keyDir))
+    fs.mkdirSync(this.keyDir);
 
   proxyReq.on('response', function(proxyRes) {
     var type = proxyRes.headers['content-type'] ||
@@ -109,4 +115,5 @@ function get(url) {
   return req;
 }
 
+exports.CachedRequest = CachedRequest;
 exports.get = get;
