@@ -51,17 +51,12 @@ function normalizeURL(url, baseURL) {
   }));
 }
 
-function getLinkedResources(url, cb) {
+function getLinkedResources(url, proxifier, cb) {
   var linkedResources = [];
   var res = new FakeResponse(url);
   var next = function(err) {
     if (err) return cb(err);
   };
-  var proxifier = new Proxifier({
-    rewriteURL: function(url) { return url; },
-    formSubmitURL: '/dummy',
-    request: cachedRequest
-  });
 
   res.on('linkedResource', function(info) {
     linkedResources.push(info);
@@ -85,9 +80,14 @@ function spider(options, cb) {
   var self = new EventEmitter();
   var MAX_SIMULTANEOUS_REQUESTS = 5;
   var visited = {};
+  var proxifier = options.proxifier || new Proxifier({
+    rewriteURL: function(url) { return url; },
+    formSubmitURL: '/dummy',
+    request: cachedRequest
+  });
   var queue = async.queue(function(task, cb) {
     visited[task.url] = true;
-    var res = getLinkedResources(task.url, function(err, r) {
+    var res = getLinkedResources(task.url, proxifier, function(err, r) {
       if (err) {
         self.emit('error', err);
         return cb(err);
@@ -142,6 +142,8 @@ function main() {
     console.log("done");
   });
 }
+
+module.exports = spider;
 
 if (!module.parent)
   main();
