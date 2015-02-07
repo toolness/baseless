@@ -13,3 +13,17 @@ exports.extractURL = function(url) {
   var urlObj = urlModule.parse(url, true);
   return urlObj.query.url + (urlObj.hash || '');
 };
+
+exports.isSameServerURL = function(a, b) {
+  var aObj = urlModule.parse(a);
+  var bObj = urlModule.parse(b);
+
+  a = urlModule.format(_.omit(aObj, 'hash'));
+  b = urlModule.format(_.omit(bObj, 'hash'));
+
+  return a == b;
+};
+
+exports.getHash = function(url) {
+  return urlModule.parse(url).hash || '';
+};
