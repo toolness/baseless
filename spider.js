@@ -97,8 +97,11 @@ function spider(options, cb) {
             (info.type == 'html' && info.nodeName == 'script')) {
           return;
         }
-        if (info.type == 'html' && info.nodeName == 'a')
+        if (info.type == 'html' && info.nodeName == 'a') {
+          if (options.linkPrefix && url.indexOf(options.linkPrefix) != 0)
+            return;
           ttl--;
+        }
         if (ttl < 0) return;
         queue.push({
           url: url,
@@ -121,7 +124,8 @@ function spider(options, cb) {
 function main() {
   spider({
     url: 'https://docs.djangoproject.com/en/1.7/',
-    ttl: 0
+    linkPrefix: 'https://docs.djangoproject.com/en/1.7/',
+    ttl: 3
   }, function(err) {
     if (err) throw err;
     console.log("done");
