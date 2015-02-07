@@ -82,7 +82,7 @@ Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
   $('style').each(function() {
     $(this).text(self.alterCSSString(baseURL, $(this).text(), true, res));
   });
-  $('script').remove();
+  $('script, object').remove();
 
   return res.type('text/html; charset=utf-8')
     .send(new Buffer($.html(), 'utf-8'));
