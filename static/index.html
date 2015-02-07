@@ -86,6 +86,12 @@ function getContentIframe() {
   return content.childNodes[0] || null;
 }
 
+function removeLinkTargets(parentNode) {
+  var elements = parentNode.querySelectorAll('a[target]');
+  for (var i = 0; i < elements.length; i++)
+    elements[i].removeAttribute('target');
+}
+
 function onHashChange() {
   var url = getCurrentURL();
   if (urlbarForm.url.value != url)
@@ -121,6 +127,7 @@ function onHashChange() {
   iframe.addEventListener('load', function() {
     iframe.contentWindow.addEventListener('hashchange', updateLocation);
     updateLocation();
+    removeLinkTargets(iframe.contentDocument);
   });
   content.appendChild(iframe);
 }
