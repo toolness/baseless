@@ -84,6 +84,8 @@ Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
   });
   $('script, object').remove();
 
+  // TODO: Ensure the HTML output has a <meta charset="utf-8"> tag.
+
   return res.type('text/html; charset=utf-8')
     .send(new Buffer($.html(), 'utf-8'));
 }
