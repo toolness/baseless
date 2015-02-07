@@ -24,7 +24,7 @@ function CachedRequest(url) {
 
   filename = encodeURIComponent(filename);
   if (filename.length > MAX_FILENAME_LEN)
-    filename = filename.slice(0, -MAX_FILENAME_LEN);
+    filename = filename.slice(0, MAX_FILENAME_LEN);
   hash.update(url);
   this.key = parsed.hostname + '/' + filename + '-' + hash.digest('hex');
   this.keyPath = CACHE_DIR + '/' + this.key + '.json';
