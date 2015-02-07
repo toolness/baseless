@@ -126,8 +126,44 @@ function spider(options, cb) {
     url: normalizeURL(options.url),
     ttl: options.ttl
   });
+  self.kill = queue.kill.bind(queue);
 
   return self;
+}
+
+function handleWebSocketConnection(ws) {
+  var spidering = null;
+  var send = function(data) {
+    ws.send(JSON.stringify(data), function(err) {
+      if (err) console.log(err);
+    });
+  };
+
+  var startSpidering = function(options) {
+    spidering = spider(options);
+    spidering.on('response', function(res) {
+      send({
+        type: 'response',
+        url: res.url
+      });
+      res.on('data', function() { /* Just drain the stream. */ });
+    }).on('end', function() {
+      spidering = null;
+      send({
+        type: 'end'
+      });
+    });
+    ws.on('close', function() {
+      spidering.removeAllListeners().kill();
+    });
+  };
+
+  ws.on('message', function(data) {
+    data = JSON.parse(data);
+    if (data.type == 'spider' && !spidering) {
+      startSpidering(data.options);
+    }
+  });
 }
 
 function main() {
@@ -144,6 +180,7 @@ function main() {
 }
 
 module.exports = spider;
+module.exports.handleWebSocketConnection = handleWebSocketConnection;
 
 if (!module.parent)
   main();

@@ -1,15 +1,20 @@
+var http = require('http');
+var WebSocketServer = require('ws').Server;
 var express = require('express');
 var basicAuth = require('basic-auth');
 var browserify = require('browserify');
 var urls = require('./urls');
 var Proxifier = require('./proxifier');
 var cachedRequest = require('./cached-request');
+var spider = require('./spider');
 
 var PORT = process.env.PORT || 3000;
 var DEBUG = 'DEBUG' in process.env;
 var USERPASS = (process.env.USERPASS || '').split(':');
 
 var bundlejs;
+var server;
+var webSocketServer;
 var app = express();
 var proxifier = new Proxifier({
   rewriteURL: urls.rewriteURL,
@@ -80,6 +85,18 @@ app.use(function(err, req, res, next) {
   return res.type("text/plain").status(500).send(err.stack);
 });
 
-app.listen(PORT, function() {
+server = http.createServer(app);
+
+server.listen(PORT, function() {
   console.log("listening on port " + PORT);
+});
+
+webSocketServer = new WebSocketServer({server: server});
+
+webSocketServer.on('connection', function(ws) {
+  var path = ws.upgradeReq.url;
+
+  if (path == '/spider') {
+    spider.handleWebSocketConnection(ws);
+  }
 });
