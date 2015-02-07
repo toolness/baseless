@@ -37,9 +37,10 @@ function Proxifier(options) {
 Proxifier.prototype.proxiedURL = function(url, baseURL) {
   if (!url) return '';
   var parsed = urlModule.parse(url);
-  if (!(parsed.protocol === null ||
-        /^https?:/.test(parsed.protocol)))
+  if (!(parsed.protocol === null || /^https?:/.test(parsed.protocol))) {
+    // It's probably a data/mailto/etc URL, don't proxy anything.
     return url;
+  }
   if (baseURL)
     url = urlModule.resolve(baseURL, url);
   return this.rewriteURL(url);
