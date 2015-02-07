@@ -10,7 +10,7 @@ var cachedRequest = require('./cached-request');
 function FakeResponse() {
   stream.PassThrough.apply(this, arguments);
   this.on('pipe', function() {
-    this.emit('done');
+    this.emit('doneSpidering');
   }.bind(this));
 }
 
@@ -19,7 +19,7 @@ util.inherits(FakeResponse, stream.PassThrough);
 FakeResponse.prototype.redirect = function(statusCode, url) {
   this.statusCode = statusCode;
   this.redirectURL = url;
-  this.emit('done');
+  this.emit('doneSpidering');
   return this;
 };
 
@@ -33,8 +33,9 @@ FakeResponse.prototype.type = function(contentType) {
   return this;
 };
 
-FakeResponse.prototype.send = function() {
-  this.emit('done');
+FakeResponse.prototype.send = function(buffer) {
+  this.emit('doneSpidering');
+  this.end(buffer);
   return this;
 };
 
@@ -63,7 +64,7 @@ function getLinkedResources(url, cb) {
     linkedResources.push(info);
   });
 
-  res.on('done', function() {
+  res.on('doneSpidering', function() {
     if (res.redirectURL)
       linkedResources.push({
         type: 'redirect',
