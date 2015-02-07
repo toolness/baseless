@@ -109,10 +109,6 @@ function onHashChange() {
       currIframeURL = urls.extractURL(iframe.contentWindow.location.href);
       if (currIframeURL == url)
         return;
-      if (urls.isSameServerURL(currIframeURL, url)) {
-        iframe.contentWindow.location.hash = urls.getHash(url);
-        return;
-      }
       content.removeChild(iframe);
     }
   } else {
