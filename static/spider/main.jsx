@@ -1,8 +1,10 @@
 var urlModule = require('url');
+var querystring = require('querystring');
 var _ = require('underscore');
 var urls = require('./urls');
 
-var DEFAULT_URL = "http://mozilla.org/";
+var URL_ARGS = querystring.parse(window.location.search.slice(1));
+var DEFAULT_URL = URL_ARGS.url || "";
 
 var SpiderEntry = React.createClass({
   mixins: [React.addons.PureRenderMixin],
