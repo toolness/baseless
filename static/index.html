@@ -76,7 +76,6 @@ function gotoURL(url) {
   if (query.url == url) return;
 
   query.url = encodeURIComponent(url);
-  spiderLink.setAttribute('href', '/spider?url=' + query.url);
   window.location.hash = '#' + querystring.stringify(query);
 }
 
@@ -97,6 +96,7 @@ function removeLinkTargets(parentNode) {
 
 function onHashChange() {
   var url = getCurrentURL();
+  spiderLink.setAttribute('href', '/spider?url=' + url);
   if (urlbarForm.url.value != url)
     urlbarForm.url.value = url;
   var iframe = getContentIframe();
