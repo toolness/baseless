@@ -1,11 +1,14 @@
 var http = require('http');
 var urlModule = require('url');
+var bodyParser = require('body-parser');
 var WebSocketServer = require('ws').Server;
 var express = require('express');
 var basicAuth = require('basic-auth');
 var browserify = require('browserify');
 var archiver = require('archiver');
+var mkdirp = require('mkdirp');
 var urls = require('./urls');
+var webxray = require('./webxray');
 var Proxifier = require('./proxifier');
 var cachedRequest = require('./cached-request');
 var spider = require('./spider');
@@ -101,7 +104,17 @@ app.get('/archive/zip', function(req, res, next) {
   });
 });
 
+app.post('/webxray/publish', bodyParser.urlencoded({
+  extended: false
+}), webxray.publish.bind(null, {
+  rootDir: __dirname + '/webxray-makes',
+  rootURL: '/makes/goggles/'
+}));
+
 app.use(express.static(__dirname + '/static'));
+
+mkdirp.sync(__dirname + '/webxray-makes');
+app.use('/makes/goggles', express.static(__dirname + '/webxray-makes'));
 app.use('/vendor/webxray',
         express.static(__dirname + '/webxray-master/static-files'));
 app.use('/vendor/webxray/src',

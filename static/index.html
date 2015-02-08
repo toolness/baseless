@@ -184,6 +184,10 @@ document.getElementById("webxray").addEventListener('click', function(e) {
   script = cWin.document.createElement('script');
   script.setAttribute('src', '/vendor/webxray/webxray.js');
   script.setAttribute('class', 'webxray');
+  cWin.webxrayWhenGogglesLoad = function(ui) {
+    ui.jQuery.webxraySettings.hackpubURL = window.location.protocol +
+      '//' + window.location.host + '/webxray/';
+  };
   cWin.document.body.appendChild(script);
   iframe.focus();
 });
