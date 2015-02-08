@@ -57,6 +57,7 @@ html, body, .browser {
       <button type="submit" class="btn btn-primary">Go <i class="fa fa-chevron-right"></i></button>
       <button id="togetherjs" class="btn btn-default"><i class="fa fa-user-plus"></i> <span class="sr-only">Collaborate</span></button>
       <button id="webxray" class="btn btn-default"><i class="fa fa-code-fork"></i> <span class="sr-only">Goggles</span></button>
+      <a id="spider" class="btn btn-default" href="/spider" target="_blank"><i class="fa fa-bug"></i></a>
     </form>
   </div>
   <div class="content"></div>
@@ -66,6 +67,7 @@ html, body, .browser {
 var querystring = require('querystring');
 var urls = require('./urls');
 var urlbarForm = document.querySelector('.urlbar form');
+var spiderLink = document.getElementById('spider');
 var content = document.querySelector('.content');
 
 function gotoURL(url) {
@@ -74,6 +76,7 @@ function gotoURL(url) {
   if (query.url == url) return;
 
   query.url = encodeURIComponent(url);
+  spiderLink.setAttribute('href', '/spider?url=' + query.url);
   window.location.hash = '#' + querystring.stringify(query);
 }
 
