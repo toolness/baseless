@@ -31,17 +31,22 @@ var SpiderEntry = React.createClass({
     var entry = this.props.entry;
     var url = entry.url;
     return (
-      <div>
+      <tr>
+        <td>
         {entry.done
          ? <i className="fa fa-check" title="This resource is now cached."/>
          : <i className="fa fa-circle-o-notch fa-spin" title="This resource is being cached."/>}
-        &nbsp;
+        </td>
+        <td>
         <span className="label label-default" title={"HTTP " + entry.statusCode + " " + entry.status}>{entry.statusCode}</span>
-        &nbsp;
+        </td>
+        <td>
         {this.iconForEntry(entry)}
-        &nbsp;
+        </td>
+        <td>
         <a href={urls.rewriteURL(url)} target="_blank">{url}</a>
-      </div>
+        </td>
+      </tr>
     );
   }
 });
@@ -101,9 +106,13 @@ var App = React.createClass({
     return (
       <div>
       <p>{this.state.done ? "Done spidering." : "Spidering..."}</p>
+      <table className="table">
+      <tbody>
       {this.state.entries.map(function(entry) {
         return <SpiderEntry key={entry.url} entry={entry}/>;
       })}
+      </tbody>
+      </table>
       </div>
     );
   }
