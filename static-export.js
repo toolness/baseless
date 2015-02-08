@@ -1,6 +1,7 @@
 var fs = require('fs');
 var urlModule = require('url');
 var path = require('path');
+var mkdirp = require('mkdirp');
 var spider = require('./spider');
 var cachedRequest = require('./cached-request');
 var Proxifier = require('./proxifier');
@@ -95,8 +96,7 @@ function main() {
     var fullPath = path.normalize(buildDir + '/' + filename);
     var dirname = path.dirname(fullPath);
 
-    if (!fs.existsSync(dirname))
-      fs.mkdirSync(dirname);
+    mkdirp.sync(dirname);
 
 //    console.log(res.url, "->", filename);
     res.pipe(fs.createWriteStream(fullPath));
@@ -105,9 +105,6 @@ function main() {
   });  
 
   assetMap.filenames[indexURL] = 'index.html';
-
-  if (!fs.existsSync(buildDir))
-    fs.mkdirSync(buildDir);
 }
 
 if (!module.parent)

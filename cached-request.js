@@ -6,12 +6,10 @@ var crypto = require('crypto');
 var mime = require('mime');
 var request = require('request');
 var async = require('async');
+var mkdirp = require('mkdirp');
 
 var CACHE_DIR = __dirname + '/cache';
 var MAX_FILENAME_LEN = 80;
-
-if (!fs.existsSync(CACHE_DIR))
-  fs.mkdirSync(CACHE_DIR);
 
 var urlQueues = {};
 
@@ -51,8 +49,7 @@ CachedRequest.prototype.cacheResponse = function(cb) {
     followRedirect: false
   });
 
-  if (!fs.existsSync(this.keyDir))
-    fs.mkdirSync(this.keyDir);
+  mkdirp.sync(this.keyDir);
 
   proxyReq.on('response', function(proxyRes) {
     var type = proxyRes.headers['content-type'] ||
