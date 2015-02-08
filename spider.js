@@ -82,6 +82,15 @@ function getLinkedResources(url, proxifier, cb) {
   return res;
 }
 
+function SpiderError(url, err) {
+  Error.call(this);
+  this.message = "Spidering error: " + err.message;
+  this.url = url;
+  this.err = err;
+}
+
+util.inherits(SpiderError, Error);
+
 function spider(options, cb) {
   var self = new EventEmitter();
   var MAX_SIMULTANEOUS_REQUESTS = 5;
@@ -95,7 +104,7 @@ function spider(options, cb) {
     visited[task.url] = true;
     var res = getLinkedResources(task.url, proxifier, function(err, r) {
       if (err) {
-        self.emit('error', err);
+        self.emit('error', new SpiderError(task.url, err));
         return cb(err);
       }
       r.forEach(function(info) {
@@ -161,6 +170,12 @@ function handleWebSocketConnection(ws) {
         send({type: 'responseEnd', url: res.url});
       });
       res.on('data', function() { /* Just drain the stream. */ });
+    }).on('error', function(err) {
+      send({
+        type: 'error',
+        url: err.url,
+        message: err.message
+      });
     }).on('end', function() {
       spidering = null;
       send({

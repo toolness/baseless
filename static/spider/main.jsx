@@ -7,6 +7,8 @@ var DEFAULT_URL = "http://mozilla.org/";
 var SpiderEntry = React.createClass({
   mixins: [React.addons.PureRenderMixin],
   iconForEntry: function(entry) {
+    if (entry.error) return null;
+
     var type = (entry.contentType || '???').split(";")[0];
     var mainType = type.split('/')[0];
     var title = "This is a file of type " + type + ".";
@@ -38,7 +40,9 @@ var SpiderEntry = React.createClass({
       <tr>
         <td>
         {entry.done
-         ? <i className="fa fa-check" title="This resource is now cached."/>
+         ? (entry.error
+            ? <i className="fa fa-warning" title={entry.error}/>
+            : <i className="fa fa-check" title="This resource is now cached."/>)
          : <i className="fa fa-circle-o-notch fa-spin" title="This resource is being cached."/>}
         </td>
         <td>
@@ -142,29 +146,42 @@ var App = React.createClass({
   handleSocketOpen: function(e) {
     this.setState({ready: true});
   },
+  updateEntry: function(url, update) {
+    var updates = {};
+    var entries = this.state.entries;
+    var index = _.indexOf(entries, _.findWhere(entries, {
+      url: url
+    }));
+    if (index == -1) {
+      return this.addEntry(_.extend({
+        url: url
+      }, update));
+    }
+    updates[index] = {$merge: update};
+    this.setState(React.addons.update(this.state, {
+      entries: updates
+    }));
+  },
+  addEntry: function(entry) {
+    this.setState({
+      entries: this.state.entries.concat(entry)
+    });
+  },
   handleSocketMessage: function(e) {
     var data = JSON.parse(e.data);
     if (data.type == 'responseStart') {
-      this.setState({
-        entries: this.state.entries.concat(_.extend({
+      this.addEntry(_.extend({
           done: false
-        }, _.omit(data, 'type')))
-      });
+      }, _.omit(data, 'type')));
     } else if (data.type == 'responseEnd') {
-      var updates = {};
-      var entries = this.state.entries;
-      var index = _.indexOf(entries, _.findWhere(entries, {
-        url: data.url
-      }));
-      if (index == -1) return;
-      updates[index] = {
-        $merge: {
-          done: true
-        }
-      };
-      this.setState(React.addons.update(this.state, {
-        entries: updates
-      }));
+      this.updateEntry(data.url, {
+        done: true
+      });
+    } else if (data.type == 'error') {
+      this.updateEntry(data.url, {
+        done: true,
+        error: data.message
+      });
     } else if (data.type == 'end') {
       this.setState({
         done: true
