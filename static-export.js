@@ -2,6 +2,7 @@ var fs = require('fs');
 var urlModule = require('url');
 var path = require('path');
 var mkdirp = require('mkdirp');
+var archiver = require('archiver');
 var spider = require('./spider');
 var cachedRequest = require('./cached-request');
 var Proxifier = require('./proxifier');
@@ -50,17 +51,40 @@ StaticAssetMap.prototype.filenameFor = function(url) {
   return this.filenames[url];
 };
 
-function archiveToFilesystem(rootDir, filename, stream) {
-  var fullPath = path.normalize(path.join(rootDir, filename));
+function FilesystemArchiver(rootDir) {
+  this.rootDir = rootDir;
+}
+
+FilesystemArchiver.prototype.archive = function(filename, stream) {
+  var fullPath = path.normalize(path.join(this.rootDir, filename));
   var dirname = path.dirname(fullPath);
 
   mkdirp.sync(dirname);
   return stream.pipe(fs.createWriteStream(fullPath));
+};
+
+FilesystemArchiver.prototype.finalize = function() {
+
+};
+
+function ArchiveFileArchiver(options) {
+  this.options = options;
+  this.archiver = archiver.create(options.format);
 }
+
+ArchiveFileArchiver.prototype.archive = function(filename, stream) {
+  this.archiver.append(stream, {name: filename});
+};
+
+ArchiveFileArchiver.prototype.finalize = function(filename, stream) {
+  this.archiver.finalize();
+};
 
 function main() {
   var indexURL = 'https://docs.djangoproject.com/en/1.7/';
-  var archive = archiveToFilesystem.bind(null, __dirname + '/build');
+  var arch = new ArchiveFileArchiver({
+    format: 'zip'
+  });
   var assetMap = new StaticAssetMap();
   var proxifier = new Proxifier({
     rewriteURL: function(url, fromURL, type) {
@@ -89,32 +113,42 @@ function main() {
     proxifier: proxifier,
     url: indexURL,
     linkPrefix: indexURL,
-    ttl: 1
+    ttl: 0
   }).on('response', function(res) {
     var req = new cachedRequest.CachedRequest(res.url);
+    var drainResponse = function() {
+      res.on('data', function() { /* Just drain the stream. */ });
+    };
+
     if (!req.isResponseCached()) {
       console.log("WARNING NO CACHED RESPONSE FOR", res.url);
-      return;
+      return drainResponse();
     }
 
     var filename = assetMap.filenameFor(res.url);
 
     if (!filename) {
       console.log("WARNING NO FILENAME FOR", res.url);
-      return;
+      return drainResponse();
     }
 
     if (assetMap.isRedirect(res.url))
-      return;
+      return drainResponse();
 
-    archive(filename, res);
+    arch.archive(filename, res);
 
 //    console.log(res.url, "->", filename);
   }).on('end', function() {
-    console.log("done");
-  });  
+    arch.finalize();
+    console.log("done spidering");
+  });
 
   assetMap.filenames[indexURL] = 'index.html';
+
+  arch.archiver.pipe(fs.createWriteStream('archive.zip'))
+    .on('close', function() {
+      console.log("done writing archive.zip");
+    });
 }
 
 if (!module.parent)
