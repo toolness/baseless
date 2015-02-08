@@ -61,6 +61,7 @@ app.get('/proxy/submit', function(req, res, next) {
 app.get('/js/bundle.js', function(req, res, next) {
   if (!bundlejs || DEBUG) {
     var b = browserify();
+    b.require('url');
     b.require('querystring');
     b.require('underscore');
     b.require('./urls');

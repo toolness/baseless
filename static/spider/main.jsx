@@ -1,5 +1,8 @@
+var urlModule = require('url');
 var _ = require('underscore');
 var urls = require('./urls');
+
+var DEFAULT_URL = "http://mozilla.org/";
 
 var SpiderEntry = React.createClass({
   mixins: [React.addons.PureRenderMixin],
@@ -44,10 +47,78 @@ var SpiderEntry = React.createClass({
         <td>
         {this.iconForEntry(entry)}
         </td>
-        <td>
-        <a href={urls.rewriteURL(url)} target="_blank">{url}</a>
+        <td className="url-cell">
+        <a href={urls.rewriteURL(url)} target="_blank" style={{
+        }}>{url}</a>
         </td>
       </tr>
+    );
+  }
+});
+
+var SpiderForm = React.createClass({
+  mixins: [React.addons.PureRenderMixin],
+  handleSubmit: function(e) {
+    e.preventDefault();
+    if (this.props.disabled) return;
+
+    var form = this.getDOMNode();
+    var url = form.url.value;
+    var urlObj = urlModule.parse(url);
+    var linkRadius = parseInt(form.linkRadius.value);
+    var follow = form.follow.value;
+    var linkPrefix = null;
+
+    if (follow != "all")
+      linkPrefix = urlObj.protocol + '//' + urlObj.host;
+
+    if (follow == "sameDomainAndPath")
+      linkPrefix += urlObj.path;
+
+    this.props.onSubmit({
+      url: url,
+      linkPrefix: linkPrefix,
+      ttl: linkRadius
+    });
+  },
+  render: function() {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        <div className="form-group">
+          <label>Starting URL</label>
+          <input type="url" name="url" className="form-control" placeholder="http://" defaultValue={DEFAULT_URL} required/>
+        </div>
+        <div className="row">
+          <div className="col-sm-6">
+            <div className="form-group">
+              <label>Follow link radius</label>
+              <select className="form-control" name="linkRadius" defaultValue="0">
+                {_.range(0, 6).map(function(i) {
+                  return <option key={i} value={i}>{i}</option>
+                })}
+              </select>
+            </div>
+          </div>
+          <div className="col-sm-6">
+            <div className="radio">
+              <label>
+                <input type="radio" name="follow" value="all" defaultChecked/> Follow all links
+              </label>
+            </div>
+            <div className="radio">
+              <label>
+                <input type="radio" name="follow" value="sameDomain"/> Follow only links on the same domain
+              </label>
+            </div>
+            <div className="radio">
+              <label>
+                <input type="radio" name="follow" value="sameDomainAndPath"/> Follow only links on the same domain and path
+              </label>
+            </div>
+          </div>
+        </div>
+        <button type="submit" className="btn btn-primary" disabled={this.props.disabled}>Start Spidering</button>
+      </form>
     );
   }
 });
@@ -57,6 +128,8 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       entries: [],
+      ready: false,
+      started: false,
       done: false
     };
   },
@@ -67,13 +140,7 @@ var App = React.createClass({
     this.socket = socket;
   },
   handleSocketOpen: function(e) {
-    this.socket.send(JSON.stringify({
-      type: 'spider',
-      options: {
-        url: 'http://mozilla.org/',
-        ttl: 0
-      }
-    }));
+    this.setState({ready: true});
   },
   handleSocketMessage: function(e) {
     var data = JSON.parse(e.data);
@@ -104,17 +171,39 @@ var App = React.createClass({
       });
     }
   },
+  handleSubmit: function(info) {
+    this.socket.send(JSON.stringify({
+      type: 'spider',
+      options: info
+    }));
+    this.setState({
+      entries: [],
+      started: true,
+      done: false
+    });
+  },
   render: function() {
     return (
       <div>
-      <p>{this.state.done ? "Done spidering." : "Spidering..."}</p>
-      <table className="table">
-      <tbody>
-      {this.state.entries.map(function(entry) {
-        return <SpiderEntry key={entry.url} entry={entry}/>;
-      })}
-      </tbody>
-      </table>
+      {this.state.ready
+       ? <SpiderForm onSubmit={this.handleSubmit} disabled={this.state.started && !this.state.done}/>
+       : null}
+      <br/>
+      {this.state.started
+       ? <div>
+           <p>{this.state.done
+               ? <span>Done spidering.</span>
+               : <span>Spidering&hellip; <i className="fa fa-circle-o-notch fa-spin"/></span>}
+           </p>
+           <table className="table">
+             <tbody>
+             {this.state.entries.map(function(entry) {
+               return <SpiderEntry key={entry.url} entry={entry}/>;
+             })}
+             </tbody>
+           </table>
+         </div>
+       : null}
       </div>
     );
   }
@@ -125,7 +214,7 @@ function socketURL(path) {
   return protocol + '//' + location.host + path;
 }
 
-React.render(
+var app = React.render(
   <App socketURL={socketURL('/spider')}/>,
   document.getElementById("app")
 );
