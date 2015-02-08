@@ -50,9 +50,17 @@ StaticAssetMap.prototype.filenameFor = function(url) {
   return this.filenames[url];
 };
 
+function archiveToFilesystem(rootDir, filename, stream) {
+  var fullPath = path.normalize(path.join(rootDir, filename));
+  var dirname = path.dirname(fullPath);
+
+  mkdirp.sync(dirname);
+  return stream.pipe(fs.createWriteStream(fullPath));
+}
+
 function main() {
   var indexURL = 'https://docs.djangoproject.com/en/1.7/';
-  var buildDir = __dirname + '/build';
+  var archive = archiveToFilesystem.bind(null, __dirname + '/build');
   var assetMap = new StaticAssetMap();
   var proxifier = new Proxifier({
     rewriteURL: function(url, fromURL, type) {
@@ -99,13 +107,9 @@ function main() {
     if (assetMap.isRedirect(res.url))
       return;
 
-    var fullPath = path.normalize(buildDir + '/' + filename);
-    var dirname = path.dirname(fullPath);
-
-    mkdirp.sync(dirname);
+    archive(filename, res);
 
 //    console.log(res.url, "->", filename);
-    res.pipe(fs.createWriteStream(fullPath));
   }).on('end', function() {
     console.log("done");
   });  
