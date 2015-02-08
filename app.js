@@ -115,10 +115,6 @@ app.use(express.static(__dirname + '/static'));
 
 mkdirp.sync(__dirname + '/webxray-makes');
 app.use('/makes/goggles', express.static(__dirname + '/webxray-makes'));
-app.use('/vendor/webxray',
-        express.static(__dirname + '/webxray-master/static-files'));
-app.use('/vendor/webxray/src',
-        express.static(__dirname + '/webxray-master/src'));
 
 app.use(function(err, req, res, next) {
   console.log(err.stack);

@@ -24,7 +24,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "postinstall": "curl -L https://github.com/toolness/webxray/archive/master.zip > master.zip && unzip -o master.zip && cd webxray-master && python go.py compile && rm ../master.zip",
+    "update-webxray": "curl -L https://github.com/toolness/webxray/archive/master.zip > master.zip && unzip -o master.zip && cd webxray-master && python go.py compile && rm ../master.zip && rm -f static-files/src && rm -rf ../static/vendor/webxray && cp -R static-files ../static/vendor/webxray && cp -R src ../static/vendor/webxray/src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
