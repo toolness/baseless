@@ -5,6 +5,8 @@ var stream = require('stream');
 var _ = require('underscore');
 var async = require('async');
 
+var HTTP_STATUS_CODES = require('http').STATUS_CODES;
+
 var Proxifier = require('./proxifier');
 var cachedRequest = require('./cached-request');
 
@@ -12,6 +14,8 @@ function FakeResponse(url) {
   stream.PassThrough.call(this);
   this.url = url;
   this.on('pipe', function() {
+    if (!this.statusCode) this.statusCode = 200;
+    if (!this.contentType) this.contentType = "text/html";
     this.emit('doneSpidering');
   }.bind(this));
 }
@@ -37,6 +41,8 @@ FakeResponse.prototype.type = function(contentType) {
 };
 
 FakeResponse.prototype.send = function(buffer) {
+  if (!this.statusCode) this.statusCode = 200;
+  if (!this.contentType) this.contentType = "text/html";
   this.emit('doneSpidering');
   this.end(buffer);
   return this;
@@ -108,13 +114,15 @@ function spider(options, cb) {
         }
         if (ttl < 0) return;
         queue.push({
+          referer: task.url,
           url: url,
           ttl: ttl
         });
         visited[url] = true;
       });
-      cb(null);
     });
+    res.on('end', cb);
+    res.referer = task.referer || null;
     self.emit('response', res);
   }, MAX_SIMULTANEOUS_REQUESTS);
 
@@ -142,9 +150,15 @@ function handleWebSocketConnection(ws) {
   var startSpidering = function(options) {
     spidering = spider(options);
     spidering.on('response', function(res) {
-      send({
-        type: 'response',
-        url: res.url
+      res.on('doneSpidering', function() {
+        send(_.extend({
+          type: 'responseStart',
+          status: HTTP_STATUS_CODES[res.statusCode]
+        }, _.pick(res, 'contentType', 'statusCode', 'url', 'referer',
+                       'redirectURL')));
+      });
+      res.on('end', function() {
+        send({type: 'responseEnd', url: res.url});
       });
       res.on('data', function() { /* Just drain the stream. */ });
     }).on('end', function() {
@@ -153,15 +167,19 @@ function handleWebSocketConnection(ws) {
         type: 'end'
       });
     });
-    ws.on('close', function() {
-      spidering.removeAllListeners().kill();
-    });
   };
 
   ws.on('message', function(data) {
     data = JSON.parse(data);
     if (data.type == 'spider' && !spidering) {
       startSpidering(data.options);
+    }
+  });
+
+  ws.on('close', function() {
+    if (spidering) {
+      spidering.removeAllListeners().kill();
+      spidering = null;
     }
   });
 }

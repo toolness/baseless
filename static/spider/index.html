@@ -1,66 +1,14 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" rel="stylesheet">
+<link rel="stylesheet" href="/vendor/makerstrap.min.css">
+<link rel="stylesheet" href="/vendor/font-awesome/css/font-awesome.css">
 <title>Spider</title>
-<div id="app"></div>
+<div class="container">
+  <h1>Spider</h1>
+  <div id="app"></div>
+</div>
 <script src="/vendor/react/build/JSXTransformer.js"></script>
 <script src="/vendor/react/build/react-with-addons.js"></script>
 <script src="/js/bundle.js"></script>
-<script type="text/jsx">
-var urls = require('./urls');
-
-var App = React.createClass({
-  getInitialState: function() {
-    return {
-      logLines: []
-    };
-  },
-  componentDidMount: function() {
-    var socket = new WebSocket(this.props.socketURL);
-    socket.addEventListener('open', this.handleSocketOpen);
-    socket.addEventListener('message', this.handleSocketMessage);
-    this.socket = socket;
-  },
-  handleSocketOpen: function(e) {
-    this.socket.send(JSON.stringify({
-      type: 'spider',
-      options: {
-        url: 'http://mozilla.org/',
-        ttl: 0
-      }
-    }));
-  },
-  handleSocketMessage: function(e) {
-    this.setState({
-      logLines: this.state.logLines.concat(JSON.parse(e.data))
-    });
-  },
-  render: function() {
-    return (
-      <div>
-      {this.state.logLines.map(function(line, i) {
-        if (line.type == 'response') {
-          return (
-            <div key={i}>
-            Retrieving <a href={line.url} target="_blank">{line.url}</a> (<a href={urls.rewriteURL(line.url)} target="_blank">view cached</a>)&hellip;
-            </div>
-          );
-        } else if (line.type == 'end') {
-          return <div key={i}>Done spidering.</div>;
-        }
-        return <div key={i}>{line}</div>;
-      })}
-      </div>
-    );
-  }
-});
-
-function socketURL(path) {
-  var protocol = location.protocol == 'https:' ? 'wss:' : 'ws:';
-  return protocol + '//' + location.host + path;
-}
-
-React.render(
-  <App socketURL={socketURL('/spider')}/>,
-  document.getElementById("app")
-);
-</script>
+<script src="main.jsx" type="text/jsx"></script>
