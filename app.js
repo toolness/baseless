@@ -1,12 +1,15 @@
 var http = require('http');
+var urlModule = require('url');
 var WebSocketServer = require('ws').Server;
 var express = require('express');
 var basicAuth = require('basic-auth');
 var browserify = require('browserify');
+var archiver = require('archiver');
 var urls = require('./urls');
 var Proxifier = require('./proxifier');
 var cachedRequest = require('./cached-request');
 var spider = require('./spider');
+var exportStaticFiles = require('./static-export');
 
 var PORT = process.env.PORT || 3000;
 var DEBUG = 'DEBUG' in process.env;
@@ -73,6 +76,29 @@ app.get('/js/bundle.js', function(req, res, next) {
   } else next();
 }, function(req, res) {
   res.type('application/javascript').send(bundlejs);
+});
+
+app.get('/archive/zip', function(req, res, next) {
+  var url = req.query.url;
+  var urlObj = urlModule.parse(url);
+  var ttl = parseInt(req.query.ttl);
+  var linkPrefix = req.query.linkPrefix;
+  var arch;
+
+  if (!(/^https?:/.test(url) && ttl >= 0))
+    return res.sendStatus(400);
+
+  arch = archiver.create('zip');
+  res.type('application/zip');
+  res.set('Content-Disposition',
+          'attachment; filename=' + urlObj.hostname + '.zip;');
+  arch.pipe(res);
+  exportStaticFiles({
+    archiver: arch,
+    url: url,
+    ttl: ttl,
+    linkPrefix: linkPrefix
+  });
 });
 
 app.use(express.static(__dirname + '/static'));

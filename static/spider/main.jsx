@@ -198,8 +198,13 @@ var App = React.createClass({
     this.setState({
       entries: [],
       started: true,
+      lastSpiderOptions: info,
       done: false
     });
+  },
+  getZipURL: function() {
+    return '/archive/zip?' +
+           querystring.stringify(this.state.lastSpiderOptions);
   },
   render: function() {
     return (
@@ -211,7 +216,9 @@ var App = React.createClass({
       {this.state.started
        ? <div>
            <p>{this.state.done
-               ? <span>Done spidering.</span>
+               ? <span>Done spidering. <a className="btn btn-default btn-xs" href={this.getZipURL()} target="_blank">
+                   <i className="fa fa-download"/> Download ZIP</a>
+                 </span>
                : <span>Spidering&hellip; <i className="fa fa-circle-o-notch fa-spin"/></span>}
            </p>
            <table className="table">
