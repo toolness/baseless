@@ -83,6 +83,12 @@ function main() {
     linkPrefix: indexURL,
     ttl: 1
   }).on('response', function(res) {
+    var req = new cachedRequest.CachedRequest(res.url);
+    if (!req.isResponseCached()) {
+      console.log("WARNING NO CACHED RESPONSE FOR", res.url);
+      return;
+    }
+
     var filename = assetMap.filenameFor(res.url);
 
     if (!filename) {
