@@ -2,6 +2,7 @@ var _ = require('underscore');
 var urls = require('./urls');
 
 var SpiderEntry = React.createClass({
+  mixins: [React.addons.PureRenderMixin],
   iconForEntry: function(entry) {
     var type = (entry.contentType || '???').split(";")[0];
     var mainType = type.split('/')[0];
@@ -52,6 +53,7 @@ var SpiderEntry = React.createClass({
 });
 
 var App = React.createClass({
+  mixins: [React.addons.PureRenderMixin],
   getInitialState: function() {
     return {
       entries: [],
