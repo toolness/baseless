@@ -18,6 +18,9 @@
     "underscore": "^1.7.0",
     "ws": "^0.7.1"
   },
+  "engines": {
+    "node": ">=0.12"
+  },
   "devDependencies": {},
   "scripts": {
     "postinstall": "curl -L https://github.com/toolness/webxray/archive/master.zip > master.zip && unzip -o master.zip && cd webxray-master && python go.py compile && rm ../master.zip",
