@@ -52,8 +52,9 @@ app.use('/proxy', function(req, res, next) {
 });
 
 app.get('/proxy', function(req, res, next) {
-  if (!req.query.url)
-    return res.status(400).send("url parameter required");
+  if (!/^https?:\/\/.+/.test(req.query.url))
+    return res.status(400)
+      .send("Please provide a proper URL.");
 
   return proxifier.proxify(req.query.url, res, next);
 });

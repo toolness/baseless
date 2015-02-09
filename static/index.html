@@ -151,9 +151,10 @@ function onHashChange() {
 
 urlbarForm.addEventListener('submit', function(e) {
   e.preventDefault();
-  if (!/^https?:\/\//i.test(urlbarForm.url.value))
-    urlbarForm.url.value = 'http://' + urlbarForm.url.value;
-  gotoURL(urlbarForm.url.value);
+  var url = urlbarForm.url.value;
+  if (url && !/^https?:\/\//i.test(url))
+    url = urlbarForm.url.value = 'http://' + url;
+  gotoURL(url);
 });
 
 window.addEventListener('load', function() {
