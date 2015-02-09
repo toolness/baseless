@@ -84,6 +84,11 @@ Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
   });
   $('script, object').remove();
 
+  // Websites with <meta viewport> tags often hide many of
+  // their most useful links inside a JS-powered hamburger,
+  // so delete the tag.
+  $('meta[name="viewport"]').remove();
+
   // TODO: Ensure the HTML output has a <meta charset="utf-8"> tag.
 
   return res.type('text/html; charset=utf-8')
