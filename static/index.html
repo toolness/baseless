@@ -54,11 +54,24 @@ html, body, .browser {
   <div class="urlbar">
     <form action="/proxy">
       <input spellcheck="false" type="text" name="url" class="form-control" placeholder="http://">
-      <button type="submit" class="btn btn-primary">Go <i class="fa fa-chevron-right"></i></button>
-      <button id="togetherjs" class="btn btn-default"><i class="fa fa-user-plus"></i> <span class="sr-only">Collaborate</span></button>
-      <button id="webxray" class="btn btn-default"><i class="fa fa-code-fork"></i> <span class="sr-only">Goggles</span></button>
-      <a id="spider" class="btn btn-default" href="/spider" target="_blank"><i class="fa fa-bug"></i></a>
-      <a class="btn btn-default" href="/about/" target="_blank"><i class="fa fa-question"></i></a>
+      <button type="submit" class="btn btn-primary">
+        Go <i class="fa fa-chevron-right"></i>
+      </button>
+      <button id="togetherjs" class="btn btn-default" title="Collaborate">
+        <i class="fa fa-user-plus"></i>
+        <span class="hidden-xs">Collaborate</span>
+      </button>
+      <button id="webxray" class="btn btn-default" title="Goggles">
+        <i class="fa fa-code-fork"></i>
+        <span class="hidden-xs">Goggles</span>
+      </button>
+      <a id="spider" class="btn btn-default" href="/spider" target="_blank" title="Spider">
+        <i class="fa fa-bug"></i>
+        <span class="hidden-xs">Spider</span>
+      </a>
+      <a class="btn btn-default" href="/about/" target="_blank" title="About">
+        <i class="fa fa-question"></i>
+      </a>
     </form>
   </div>
   <div class="content"></div>
