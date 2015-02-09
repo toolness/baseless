@@ -108,12 +108,12 @@ var SpiderForm = React.createClass({
           <div className="col-sm-6">
             <div className="radio">
               <label>
-                <input type="radio" name="follow" value="all" defaultChecked/> Follow all links
+                <input type="radio" name="follow" value="all"/> Follow all links <i className="fa fa-warning" title="Be careful with this option, you could accidentally spider a big chunk of the internet."/>
               </label>
             </div>
             <div className="radio">
               <label>
-                <input type="radio" name="follow" value="sameDomain"/> Follow only links on the same domain
+                <input type="radio" name="follow" value="sameDomain" defaultChecked/> Follow only links on the same domain
               </label>
             </div>
             <div className="radio">
