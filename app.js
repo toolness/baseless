@@ -117,7 +117,8 @@ app.get('/archive/zip', function(req, res, next) {
 });
 
 app.post('/webxray/publish', bodyParser.urlencoded({
-  extended: false
+  extended: false,
+  limit: 2 * 1024 * 1024
 }), webxray.publish.bind(null, {
   rootDir: __dirname + '/webxray-makes',
   rootURL: '/makes/goggles/'
