@@ -1,7 +1,10 @@
 var child_process = require('child_process');
+var os = require('os');
 
 var WIN32_IPCONFIG = 'C:\\Windows\\system32\\ipconfig.exe';
 var WIN32_IP_REGEX = /IPv4 Address[\s.:]+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/;
+var POSIX_IFCONFIG = '/sbin/ifconfig';
+var POSIX_IP_REGEX = /inet\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/;
 
 function getWin32(cb) {
   var hostnames = [];
@@ -19,7 +22,16 @@ function getWin32(cb) {
 }
 
 function getPosix(cb) {
-  // TODO: Finish this
+  var hostnames = [os.hostname()];
+
+  child_process.exec(POSIX_IFCONFIG, function(err, stdout) {
+    if (err) return cb(hostnames);
+    stdout.split('\n').forEach(function(line) {
+      var match = line.match(POSIX_IP_REGEX);
+      if (match) hostnames.push(match[1]);
+    });
+    cb(hostnames);
+  });
 }
 
 function get(cb) {
