@@ -7,6 +7,7 @@ var basicAuth = require('basic-auth');
 var browserify = require('browserify');
 var archiver = require('archiver');
 var mkdirp = require('mkdirp');
+var hostnames = require('./hostnames');
 var urls = require('./urls');
 var webxray = require('./webxray');
 var Proxifier = require('./proxifier');
@@ -62,6 +63,16 @@ app.get('/proxy/submit', function(req, res, next) {
 
   if (!url) return res.sendStatus(400);
   return res.redirect('/proxy?url=' + encodeURIComponent(url));
+});
+
+app.get('/js/ipconfig.js', function(req, res, next) {
+  hostnames.get(function(hostnames) {
+    var js = 'var IPCONFIG = ' + JSON.stringify({
+      port: PORT,
+      hostnames: hostnames
+    }, null, 2) + ';';
+    res.type('application/javascript').send(js);
+  });
 });
 
 app.get('/js/bundle.js', function(req, res, next) {

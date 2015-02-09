@@ -40,7 +40,7 @@ function get(cb) {
   return getPosix(cb);
 }
 
-module.exports = get;
+exports.get = get;
 
 if (!module.parent)
   get(function(info) {
