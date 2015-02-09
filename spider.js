@@ -113,7 +113,9 @@ function spider(options, cb) {
 
         if (!/^https?:\/\//.test(url) ||
             (url in visited) ||
-            (info.type == 'html' && info.nodeName == 'script')) {
+            (info.type == 'html' && info.nodeName == 'script') ||
+            (info.type == 'html' && info.nodeName == 'link' &&
+             info.relType != 'stylesheet')) {
           return;
         }
         if (info.type == 'html' && info.nodeName == 'a') {

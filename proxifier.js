@@ -58,6 +58,7 @@ Proxifier.prototype.alterHTML = function(baseURL, html, res, next) {
         url: url,
         type: 'html',
         nodeName: this.name,
+        relType: (this.name == 'link') ? $(this).attr('rel') : null,
         attribute: attrName
       });
       $(this).attr(attrName, self.proxiedURL(url, baseURL, 'html'));
