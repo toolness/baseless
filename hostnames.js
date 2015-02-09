@@ -4,7 +4,7 @@ var os = require('os');
 var WIN32_IPCONFIG = 'C:\\Windows\\system32\\ipconfig.exe';
 var WIN32_IP_REGEX = /IPv4 Address[\s.:]+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/;
 var POSIX_IFCONFIG = '/sbin/ifconfig';
-var POSIX_IP_REGEX = /inet\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/;
+var POSIX_IP_REGEX = /inet[\sa-z:]+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/;
 
 function getWin32(cb) {
   var hostnames = [];
