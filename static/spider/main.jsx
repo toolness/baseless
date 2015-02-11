@@ -129,6 +129,48 @@ var SpiderForm = React.createClass({
   }
 });
 
+var InfiniteScrollSpideringLog = React.createClass({
+  ENTRIES_CHUNKING_SIZE: 50,
+  mixins: [React.addons.PureRenderMixin],
+  getInitialState: function() {
+    return {
+      entriesToShow: this.ENTRIES_CHUNKING_SIZE
+    };
+  },
+  componentDidMount: function() {
+    this.intervalID = window.setInterval(this.showMore, 500);
+    window.addEventListener('scroll', this.showMore);
+  },
+  componentWillUnmount: function() {
+    window.clearInterval(this.intervalID);
+    window.removeEventListener('scroll', this.showMore);
+  },
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.entries.length < this.props.entries.length) {
+      // Looks like we just reset.
+      this.setState(this.getInitialState());
+    }
+  },
+  showMore: function() {
+    var yTop = window.scrollY;
+    var totalHeight = document.body.offsetHeight;
+    var windowHeight = window.innerHeight;
+    var entriesToShow = this.state.entriesToShow;
+
+    if ((yTop + windowHeight >= totalHeight - (windowHeight / 3)) &&
+        (this.props.entries.length > entriesToShow)) {
+      this.setState({
+        entriesToShow: entriesToShow + this.ENTRIES_CHUNKING_SIZE
+      });
+    }
+  },
+  render: function() {
+    var entries = this.props.entries.slice(0, this.state.entriesToShow);
+
+    return <SpideringLogSlice entries={entries}/>;
+  }
+});
+
 var SpideringLogSlice = React.createClass({
   shouldComponentUpdate: function(nextProps) {
     if (this.props.entries.length != nextProps.entries.length)
@@ -151,12 +193,10 @@ var SpideringLogSlice = React.createClass({
 });
 
 var App = React.createClass({
-  ENTRIES_CHUNKING_SIZE: 50,
   mixins: [React.addons.PureRenderMixin],
   getInitialState: function() {
     return {
       entries: [],
-      entriesToShow: this.ENTRIES_CHUNKING_SIZE,
       ready: false,
       started: false,
       done: false
@@ -167,27 +207,7 @@ var App = React.createClass({
     socket.addEventListener('open', this.handleSocketOpen);
     socket.addEventListener('message', this.handleSocketMessage);
     this.socket = socket;
-
-    this.intervalID = window.setInterval(this.showMore, 500);
-    window.addEventListener('scroll', this.showMore);
     this.entryUrlIndexes = {};
-  },
-  componentWillUnmount: function() {
-    window.clearInterval(this.intervalID);
-    window.removeEventListener('scroll', this.showMore);
-  },
-  showMore: function() {
-    var yTop = window.scrollY;
-    var totalHeight = document.body.offsetHeight;
-    var windowHeight = window.innerHeight;
-    var entriesToShow = this.state.entriesToShow;
-
-    if ((yTop + windowHeight >= totalHeight - (windowHeight / 3)) &&
-        (this.state.entries.length > entriesToShow)) {
-      this.setState({
-        entriesToShow: entriesToShow + this.ENTRIES_CHUNKING_SIZE
-      });
-    }
   },
   handleSocketOpen: function(e) {
     this.setState({ready: true});
@@ -251,8 +271,6 @@ var App = React.createClass({
            querystring.stringify(this.state.lastSpiderOptions);
   },
   render: function() {
-    var entries = this.state.entries.slice(0, this.state.entriesToShow);
-
     return (
       <div>
       {this.state.ready
@@ -267,7 +285,7 @@ var App = React.createClass({
                  </span>
                : <span>Spidering through {this.state.entries.length} URLs&hellip; <i className="fa fa-circle-o-notch fa-spin"/></span>}
            </p>
-           <SpideringLogSlice entries={entries}/>
+           <InfiniteScrollSpideringLog entries={this.state.entries}/>
          </div>
        : null}
       </div>
