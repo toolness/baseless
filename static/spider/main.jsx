@@ -130,10 +130,12 @@ var SpiderForm = React.createClass({
 });
 
 var App = React.createClass({
+  ENTRIES_CHUNKING_SIZE: 50,
   mixins: [React.addons.PureRenderMixin],
   getInitialState: function() {
     return {
       entries: [],
+      entriesToShow: this.ENTRIES_CHUNKING_SIZE,
       ready: false,
       started: false,
       done: false
@@ -144,6 +146,26 @@ var App = React.createClass({
     socket.addEventListener('open', this.handleSocketOpen);
     socket.addEventListener('message', this.handleSocketMessage);
     this.socket = socket;
+
+    this.intervalID = window.setInterval(this.showMore, 500);
+    window.addEventListener('scroll', this.showMore);
+  },
+  componentWillUnmount: function() {
+    window.clearInterval(this.intervalID);
+    window.removeEventListener('scroll', this.showMore);
+  },
+  showMore: function() {
+    var yTop = window.scrollY;
+    var totalHeight = document.body.offsetHeight;
+    var windowHeight = window.innerHeight;
+    var entriesToShow = this.state.entriesToShow;
+
+    if ((yTop + windowHeight >= totalHeight - (windowHeight / 3)) &&
+        (this.state.entries.length > entriesToShow)) {
+      this.setState({
+        entriesToShow: entriesToShow + this.ENTRIES_CHUNKING_SIZE
+      });
+    }
   },
   handleSocketOpen: function(e) {
     this.setState({ready: true});
@@ -207,6 +229,8 @@ var App = React.createClass({
            querystring.stringify(this.state.lastSpiderOptions);
   },
   render: function() {
+    var entries = this.state.entries.slice(0, this.state.entriesToShow);
+
     return (
       <div>
       {this.state.ready
@@ -223,7 +247,7 @@ var App = React.createClass({
            </p>
            <table className="table">
              <tbody>
-             {this.state.entries.map(function(entry) {
+             {entries.map(function(entry) {
                return <SpiderEntry key={entry.url} entry={entry}/>;
              })}
              </tbody>
