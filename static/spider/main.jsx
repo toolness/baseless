@@ -131,7 +131,6 @@ var SpiderForm = React.createClass({
 
 var App = React.createClass({
   ENTRIES_CHUNKING_SIZE: 50,
-  mixins: [React.addons.PureRenderMixin],
   getInitialState: function() {
     return {
       entries: [],
@@ -149,10 +148,25 @@ var App = React.createClass({
 
     this.intervalID = window.setInterval(this.showMore, 500);
     window.addEventListener('scroll', this.showMore);
+    this.entryUrlIndexes = {};
   },
   componentWillUnmount: function() {
     window.clearInterval(this.intervalID);
     window.removeEventListener('scroll', this.showMore);
+  },
+  shouldComponentUpdate: function(nextProps, nextState) {
+    if (['ready', 'started', 'done',
+         'entriesToShow'].some(function(prop) {
+      return this.state[prop] !== nextState[prop];
+    }, this))
+      return true;
+    var entries = this.state.entries.slice(0, this.state.entriesToShow);
+    var nextEntries = nextState.entries.slice(0, this.state.entriesToShow);
+    if (this.state.entries.length <= this.state.entriesToShow)
+      return true;
+    return entries.some(function(entry, i) {
+      return entries[i] !== nextEntries[i];
+    });
   },
   showMore: function() {
     var yTop = window.scrollY;
@@ -173,20 +187,19 @@ var App = React.createClass({
   updateEntry: function(url, update) {
     var updates = {};
     var entries = this.state.entries;
-    var index = _.indexOf(entries, _.findWhere(entries, {
-      url: url
-    }));
-    if (index == -1) {
-      return this.addEntry(_.extend({
+    if (url in this.entryUrlIndexes) {
+      updates[this.entryUrlIndexes[url]] = {$merge: update};
+      this.setState(React.addons.update(this.state, {
+        entries: updates
+      }));
+    } else {
+      this.addEntry(_.extend({
         url: url
       }, update));
     }
-    updates[index] = {$merge: update};
-    this.setState(React.addons.update(this.state, {
-      entries: updates
-    }));
   },
   addEntry: function(entry) {
+    this.entryUrlIndexes[entry.url] = this.state.entries.length;
     this.setState({
       entries: this.state.entries.concat(entry)
     });
@@ -223,6 +236,7 @@ var App = React.createClass({
       lastSpiderOptions: info,
       done: false
     });
+    this.entryUrlIndexes = {};
   },
   getZipURL: function() {
     return '/archive/zip?' +
