@@ -133,6 +133,9 @@ Proxifier.prototype.proxify = function(url, res, next) {
                'application/octet-stream';
     var ext = mime.extension(type);
 
+    if ('wasAlreadyCached' in proxyRes)
+      res.wasAlreadyCached = proxyRes.wasAlreadyCached;
+
     if (proxyRes.headers['location'] && proxyRes.statusCode > 300 &&
         proxyRes.statusCode < 304) {
       return res.redirect(

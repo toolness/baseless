@@ -74,25 +74,26 @@ CachedRequest.prototype.cacheResponse = function(cb) {
   return proxyReq;
 };
 
-CachedRequest.prototype.sendResponse = function() {
+CachedRequest.prototype.sendResponse = function(wasAlreadyCached) {
   var metadata = JSON.parse(fs.readFileSync(this.keyPath));
   var contentPath = CACHE_DIR + '/' + metadata.filename;
   var response = fs.createReadStream(contentPath);
   response.statusCode = metadata.statusCode;
   response.headers = metadata.headers;
+  response.wasAlreadyCached = wasAlreadyCached;
   this.emit('response', response);
 };
 
 function respond(req, cb) {
   if (req.isResponseCached()) {
-    req.sendResponse();
+    req.sendResponse(true);
     cb(null);
   } else {
     req.cacheResponse(function(err) {
       cb(null);
       if (err)
         return req.emit('error', err);
-      req.sendResponse();
+      req.sendResponse(false);
     });
   }
 }

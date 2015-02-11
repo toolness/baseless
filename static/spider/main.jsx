@@ -48,6 +48,11 @@ var SpiderEntry = React.createClass({
          : <i className="fa fa-circle-o-notch fa-spin" title="This resource is being cached."/>}
         </td>
         <td>
+        {entry.wasAlreadyCached
+         ? <i className="fa fa-database" title="The contents of this URL were previously cached."/>
+         : <i className="fa fa-cloud" title="The contents of this URL were just retrieved from the internet and are now cached."/>}
+        </td>
+        <td>
         <span className="label label-default" title={"HTTP " + entry.statusCode + " " + entry.status}>{entry.statusCode}</span>
         </td>
         <td>

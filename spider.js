@@ -166,7 +166,7 @@ function handleWebSocketConnection(ws) {
           type: 'responseStart',
           status: HTTP_STATUS_CODES[res.statusCode]
         }, _.pick(res, 'contentType', 'statusCode', 'url', 'referer',
-                       'redirectURL')));
+                       'redirectURL', 'wasAlreadyCached')));
       });
       res.on('end', function() {
         send({type: 'responseEnd', url: res.url});
