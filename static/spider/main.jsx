@@ -129,8 +129,30 @@ var SpiderForm = React.createClass({
   }
 });
 
+var SpideringLogSlice = React.createClass({
+  shouldComponentUpdate: function(nextProps) {
+    if (this.props.entries.length != nextProps.entries.length)
+      return true;
+    return this.props.entries.some(function(entry, i) {
+      return this.props.entries[i] !== nextProps.entries[i];
+    }, this);
+  },
+  render: function() {
+    return (
+      <table className="table">
+        <tbody>
+        {this.props.entries.map(function(entry) {
+          return <SpiderEntry key={entry.url} entry={entry}/>;
+        })}
+        </tbody>
+      </table>
+    );
+  }
+});
+
 var App = React.createClass({
   ENTRIES_CHUNKING_SIZE: 50,
+  mixins: [React.addons.PureRenderMixin],
   getInitialState: function() {
     return {
       entries: [],
@@ -153,20 +175,6 @@ var App = React.createClass({
   componentWillUnmount: function() {
     window.clearInterval(this.intervalID);
     window.removeEventListener('scroll', this.showMore);
-  },
-  shouldComponentUpdate: function(nextProps, nextState) {
-    if (['ready', 'started', 'done',
-         'entriesToShow'].some(function(prop) {
-      return this.state[prop] !== nextState[prop];
-    }, this))
-      return true;
-    var entries = this.state.entries.slice(0, this.state.entriesToShow);
-    var nextEntries = nextState.entries.slice(0, this.state.entriesToShow);
-    if (this.state.entries.length <= this.state.entriesToShow)
-      return true;
-    return entries.some(function(entry, i) {
-      return entries[i] !== nextEntries[i];
-    });
   },
   showMore: function() {
     var yTop = window.scrollY;
@@ -257,15 +265,9 @@ var App = React.createClass({
                ? <span>Done spidering. <a className="btn btn-default btn-xs" href={this.getZipURL()} target="_blank">
                    <i className="fa fa-download"/> Download ZIP</a>
                  </span>
-               : <span>Spidering&hellip; <i className="fa fa-circle-o-notch fa-spin"/></span>}
+               : <span>Spidering through {this.state.entries.length} URLs&hellip; <i className="fa fa-circle-o-notch fa-spin"/></span>}
            </p>
-           <table className="table">
-             <tbody>
-             {entries.map(function(entry) {
-               return <SpiderEntry key={entry.url} entry={entry}/>;
-             })}
-             </tbody>
-           </table>
+           <SpideringLogSlice entries={entries}/>
          </div>
        : null}
       </div>
