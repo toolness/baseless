@@ -260,7 +260,7 @@ var App = React.createClass({
     var data = JSON.parse(e.data);
     if (data.type == 'responseStart') {
       this.addEntry(_.extend({
-          done: false
+        done: false
       }, _.omit(data, 'type')));
     } else if (data.type == 'responseEnd') {
       this.updateEntry(data.url, {
