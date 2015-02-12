@@ -35,6 +35,24 @@ var SpiderEntry = React.createClass({
       </a>
     );
   },
+  labelForStatusCode: function(entry) {
+    var title = "HTTP " + entry.statusCode + " " + entry.status;
+    var labelClass = "label-default";
+
+    if (entry.statusCode >= 200 && entry.statusCode < 300) {
+      labelClass = "label-success";
+    } else if (entry.statusCode >= 400 && entry.statusCode < 500) {
+      labelClass = "label-warning";
+    } else if (entry.statusCode >= 500) {
+      labelClass = "label-danger";
+    }
+
+    return (
+      <span className={"label " + labelClass} title={title}>
+        {entry.statusCode}
+      </span>
+    );
+  },
   render: function() {
     var entry = this.props.entry;
     var url = entry.url;
@@ -53,7 +71,7 @@ var SpiderEntry = React.createClass({
          : <i className="fa fa-cloud" title="The contents of this URL were just retrieved from the internet and are now cached."/>}
         </td>
         <td>
-        <span className="label label-default" title={"HTTP " + entry.statusCode + " " + entry.status}>{entry.statusCode}</span>
+        {this.labelForStatusCode(entry)}
         </td>
         <td>
         {this.iconForEntry(entry)}
