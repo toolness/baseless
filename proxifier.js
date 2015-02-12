@@ -147,6 +147,7 @@ Proxifier.prototype.proxify = function(url, res, next) {
     if (ext in self.EXT_HANDLERS)
       return getBody(type, 'utf-8', proxyRes, function(err, body) {
         if (err) return next(err);
+        res.status(proxyRes.statusCode);
         return self.EXT_HANDLERS[ext].call(self, url, body, res, next);
       });
 
