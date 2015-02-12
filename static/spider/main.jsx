@@ -220,6 +220,7 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       entries: [],
+      totalSize: 0,
       ready: false,
       started: false,
       done: false
@@ -263,7 +264,11 @@ var App = React.createClass({
       }, _.omit(data, 'type')));
     } else if (data.type == 'responseEnd') {
       this.updateEntry(data.url, {
+        size: data.size,
         done: true
+      });
+      this.setState({
+        totalSize: this.state.totalSize + data.size
       });
     } else if (data.type == 'error') {
       this.updateEntry(data.url, {
@@ -283,6 +288,7 @@ var App = React.createClass({
     }));
     this.setState({
       entries: [],
+      totalSize: 0,
       started: true,
       lastSpiderOptions: info,
       done: false
@@ -306,8 +312,9 @@ var App = React.createClass({
                ? <span>Done spidering. <a className="btn btn-default btn-xs" href={this.getZipURL()} target="_blank">
                    <i className="fa fa-download"/> Download ZIP</a>
                  </span>
-               : <span>Spidering through {this.state.entries.length} URLs&hellip; <i className="fa fa-circle-o-notch fa-spin"/></span>}
+               : <span>Spidering&hellip; <i className="fa fa-circle-o-notch fa-spin"/></span>}
            </p>
+           <p>Cached {numberWithCommas(this.state.totalSize)} bytes over {this.state.entries.length} URLs.</p>
            <InfiniteScrollSpideringLog entries={this.state.entries}/>
          </div>
        : null}
@@ -315,6 +322,11 @@ var App = React.createClass({
     );
   }
 });
+
+// http://stackoverflow.com/a/2901298
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 function socketURL(path) {
   var protocol = location.protocol == 'https:' ? 'wss:' : 'ws:';

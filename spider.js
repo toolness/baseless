@@ -161,6 +161,7 @@ function handleWebSocketConnection(ws) {
   var startSpidering = function(options) {
     spidering = spider(options);
     spidering.on('response', function(res) {
+      var size = 0;
       res.on('doneSpidering', function() {
         send(_.extend({
           type: 'responseStart',
@@ -169,9 +170,9 @@ function handleWebSocketConnection(ws) {
                        'redirectURL', 'wasAlreadyCached')));
       });
       res.on('end', function() {
-        send({type: 'responseEnd', url: res.url});
+        send({type: 'responseEnd', url: res.url, size: size});
       });
-      res.on('data', function() { /* Just drain the stream. */ });
+      res.on('data', function(chunk) { size += chunk.length; });
     }).on('error', function(err) {
       send({
         type: 'error',
