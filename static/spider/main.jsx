@@ -39,7 +39,7 @@ var SpiderEntry = React.createClass({
     var entry = this.props.entry;
     var url = entry.url;
     return (
-      <tr>
+      <tr className={entry.error ? "warning" : null}>
         <td>
         {entry.done
          ? (entry.error
