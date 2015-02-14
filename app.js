@@ -7,13 +7,13 @@ var basicAuth = require('basic-auth');
 var browserify = require('browserify');
 var archiver = require('archiver');
 var mkdirp = require('mkdirp');
-var hostnames = require('./hostnames');
-var urls = require('./urls');
-var webxray = require('./webxray');
-var Proxifier = require('./proxifier');
-var cachedRequest = require('./cached-request');
-var spider = require('./spider');
-var exportStaticFiles = require('./static-export');
+var hostnames = require('./lib/hostnames');
+var urls = require('./lib/urls');
+var webxray = require('./lib/webxray');
+var Proxifier = require('./lib/proxifier');
+var cachedRequest = require('./lib/cached-request');
+var spider = require('./lib/spider');
+var exportStaticFiles = require('./lib/static-export');
 
 var PORT = process.env.PORT || 3000;
 var DEBUG = 'DEBUG' in process.env;
@@ -82,7 +82,7 @@ app.get('/js/bundle.js', function(req, res, next) {
     b.require('url');
     b.require('querystring');
     b.require('underscore');
-    b.require('./urls');
+    b.require('./lib/urls');
     b.bundle(function(err, buf) {
       if (err) return next(err);
       bundlejs = buf;
