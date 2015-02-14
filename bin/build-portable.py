@@ -1,17 +1,21 @@
 import os
+import sys
 import subprocess
+import json
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 path = lambda *x: os.path.join(ROOT, *x)
 
 LOCAL_NODE = path('node.exe')
+PACKAGE_JSON = json.load(open(path('package.json')))
+VERSION = PACKAGE_JSON['version']
 
 if os.path.exists(LOCAL_NODE):
     os.unlink(LOCAL_NODE)
 
 NODE_VERSION = subprocess.check_output(['node', '--version']).strip()
-ZIP_FILENAME = 'baseless.zip'
+ZIP_FILENAME = 'baseless-v%s-%s.zip' % (VERSION, sys.platform)
 
 IGNORE_DIRS = [
     'cache',
@@ -54,3 +58,5 @@ for root, dirs, files in os.walk(path()):
                  zippath(relpath))
 
 zf.close()
+
+print "Finished writing %s." % ZIP_FILENAME
