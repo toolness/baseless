@@ -35,7 +35,7 @@ print "Retrieving %s" % NODE_EXE_URL
 subprocess.check_call(['node', path('bin', 'https-get.js'),
                        NODE_EXE_URL, LOCAL_NODE])
 
-zf = zipfile.ZipFile(ZIP_FILENAME, 'w')
+zf = zipfile.ZipFile(ZIP_FILENAME, 'w', zipfile.ZIP_DEFLATED)
 
 zippath = lambda *x: os.path.join('baseless', *x)
 
