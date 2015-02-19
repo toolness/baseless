@@ -43,7 +43,7 @@ if (USERPASS.length == 2)
   });
 
 app.use('/d/ping/:character', function(req, res, next) {
-  var character = req.param('character');
+  var character = req.params['character'];
   var buf = new Buffer(1024 * 100);
 
   if (!/^[a-zA-Z0-9]$/.test(character))
