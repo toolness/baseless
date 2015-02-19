@@ -42,6 +42,18 @@ if (USERPASS.length == 2)
     next();
   });
 
+app.use('/d/ping/:character', function(req, res, next) {
+  var character = req.param('character');
+  var buf = new Buffer(1024 * 100);
+
+  if (!/^[a-zA-Z0-9]$/.test(character))
+    return next('route');
+
+  buf.fill(character);
+  res.set('Cache-Control', 'no-cache');
+  res.type('text/plain').send(buf);
+});
+
 app.use('/proxy', function(req, res, next) {
   res.set('Content-Security-Policy', [
     "default-src 'self' data:",

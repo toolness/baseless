@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" rel="stylesheet">
+<link rel="stylesheet" href="/vendor/makerstrap.min.css">
+<link rel="stylesheet" href="/vendor/font-awesome/css/font-awesome.css">
+<title>Diagnostics</title>
+<div class="container">
+  <h1>Diagnostics</h1>
+  <div class="well">
+    Average megabits per second: <span id="speed">0</span>
+  </div>
+  <p>Don't leave this page open for too long, as it's basically
+    saturating your network.</p>
+</div>
+<script>
+var totalBytes = 0;
+
+function ping() {
+  var req = new XMLHttpRequest();
+  req.open('GET', '/d/ping/a?bust=' + Date.now());
+  req.onload = function() {
+    totalBytes += req.responseText.length;
+    setTimeout(ping, 10);
+  };
+  req.onerror = function() {
+    setTimeout(ping, 1000);
+  };
+  req.send(null);
+}
+
+function updatePage() {
+  var bits = totalBytes * 8;
+  var megabits = Math.floor(bits / (1024 * 1024)).toString();
+  document.getElementById('speed').textContent = megabits;
+  totalBytes = 0;
+}
+
+setInterval(updatePage, 1000);
+
+updatePage();
+ping();
+</script>
