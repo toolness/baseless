@@ -21,6 +21,7 @@
 <script src="/vendor/epoch.min.js"></script>
 <script>
 var REQUEST_DELAY = 10;
+var MAX_BYTES_PER_SECOND = 1024 * 100;
 var totalBytes = 0;
 var totalMs = 0;
 var numRequests = 0;
@@ -40,6 +41,8 @@ function ping() {
     totalMs += (Date.now() - start);
     totalBytes += req.responseText.length;
     req = null;
+    if (totalBytes >= MAX_BYTES_PER_SECOND)
+      return;
     setTimeout(ping, REQUEST_DELAY);
   };
   req.onabort = function() {
@@ -52,12 +55,16 @@ function ping() {
   req.send(null);
 }
 
-function updatePage() {
+function getCurrentMbps() {
   var bits = totalBytes * 8;
   var megabits = bits / (1024 * 1024);
-  var latency = Math.floor(totalMs / numRequests);
 
-  megabits = (megabits / totalMs) * 1000;
+  return (megabits / totalMs) * 1000;
+}
+
+function updatePage() {
+  var megabits = getCurrentMbps();
+  var latency = Math.floor(totalMs / numRequests);
 
   document.getElementById('speed').textContent = megabits.toFixed(1);
   document.getElementById('latency').textContent = latency.toString();
