@@ -44,7 +44,7 @@ if (USERPASS.length == 2)
 
 app.use('/d/ping/:character', function(req, res, next) {
   var character = req.params['character'];
-  var buf = new Buffer(1024 * 100);
+  var buf = new Buffer(1024 * 10);
 
   if (!/^[a-zA-Z0-9]$/.test(character))
     return next('route');
