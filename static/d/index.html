@@ -4,17 +4,25 @@
 <link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" rel="stylesheet">
 <link rel="stylesheet" href="/vendor/makerstrap.min.css">
 <link rel="stylesheet" href="/vendor/font-awesome/css/font-awesome.css">
+<link rel="stylesheet" href="/vendor/epoch.min.css">
 <title>Diagnostics</title>
 <div class="container">
   <h1>Diagnostics</h1>
+  <div id="chart" class="epoch category10" style="height: 200px;"></div>
   <div class="well">
     Average megabits per second: <span id="speed">0</span>
   </div>
   <p>Don't leave this page open for too long, as it's basically
     saturating your network.</p>
 </div>
+<script src="/vendor/jquery.js"></script>
+<script src="/vendor/d3.v3.js"></script>
+<script src="/vendor/epoch.min.js"></script>
 <script>
 var totalBytes = 0;
+var historicData = [{
+  values: [{time: Date.now() / 1000, y: 0}]
+}];
 
 function ping() {
   var req = new XMLHttpRequest();
@@ -31,13 +39,22 @@ function ping() {
 
 function updatePage() {
   var bits = totalBytes * 8;
-  var megabits = Math.floor(bits / (1024 * 1024)).toString();
-  document.getElementById('speed').textContent = megabits;
+  var megabits = bits / (1024 * 1024);
+  document.getElementById('speed').textContent = megabits.toFixed(1);
   totalBytes = 0;
+  chart.push([{
+    time: Date.now() / 1000,
+    y: megabits
+  }]);
 }
+
+var chart = $('#chart').epoch({
+  type: 'time.area',
+  data: historicData,
+  axes: ['left', 'right', 'bottom']
+});
 
 setInterval(updatePage, 1000);
 
-updatePage();
 ping();
 </script>
