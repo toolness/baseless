@@ -151,5 +151,7 @@ webSocketServer.on('connection', function(ws) {
 
   if (path == '/spider') {
     spider.handleWebSocketConnection(ws);
+  } else if (path == '/d/traceroute') {
+    diagnostics.traceroute(ws);
   }
 });
