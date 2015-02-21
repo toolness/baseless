@@ -6,6 +6,7 @@
 <title>Traceroute</title>
 <div class="container">
   <h1>Traceroute</h1>
+  <p id="status">Running traceroute&hellip; <i class="fa fa-spin fa-circle-o-notch"></i></p>
   <pre id="log"></pre>
 </div>
 <script>
@@ -19,5 +20,10 @@ var socket = new WebSocket(socketURL('/d/traceroute'));
 socket.addEventListener('message', function(e) {
   var log = document.getElementById('log');
   log.appendChild(document.createTextNode(e.data));
+});
+
+socket.addEventListener('close', function() {
+  var status = document.getElementById('status');
+  status.textContent = "Traceroute complete.";
 });
 </script>
