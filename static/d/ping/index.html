@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" rel="stylesheet">
+<link rel="stylesheet" href="/vendor/makerstrap.min.css">
+<link rel="stylesheet" href="/vendor/font-awesome/css/font-awesome.css">
+<title>Ping</title>
+<div class="container">
+  <h1>Ping</h1>
+  <p id="status">Running ping&hellip; <i class="fa fa-spin fa-circle-o-notch"></i></p>
+  <pre id="log"></pre>
+</div>
+<script>
+function socketURL(path) {
+  var protocol = location.protocol == 'https:' ? 'wss:' : 'ws:';
+  return protocol + '//' + location.host + path;
+}
+
+var socket = new WebSocket(socketURL('/d/ping'));
+
+socket.addEventListener('message', function(e) {
+  var log = document.getElementById('log');
+  log.appendChild(document.createTextNode(e.data));
+});
+
+socket.addEventListener('close', function() {
+  var status = document.getElementById('status');
+  status.textContent = "Ping complete.";
+});
+</script>

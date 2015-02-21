@@ -153,5 +153,7 @@ webSocketServer.on('connection', function(ws) {
     spider.handleWebSocketConnection(ws);
   } else if (path == '/d/traceroute') {
     diagnostics.traceroute(ws);
+  } else if (path == '/d/ping') {
+    diagnostics.ping(ws);
   }
 });
