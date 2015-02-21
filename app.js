@@ -14,6 +14,7 @@ var Proxifier = require('./lib/proxifier');
 var cachedRequest = require('./lib/cached-request');
 var spider = require('./lib/spider');
 var exportStaticFiles = require('./lib/static-export');
+var diagnostics = require('./lib/diagnostics');
 
 var PORT = process.env.PORT || 3000;
 var DEBUG = 'DEBUG' in process.env;
@@ -42,17 +43,7 @@ if (USERPASS.length == 2)
     next();
   });
 
-app.use('/d/ping/:character', function(req, res, next) {
-  var character = req.params['character'];
-  var buf = new Buffer(1024 * 10);
-
-  if (!/^[a-zA-Z0-9]$/.test(character))
-    return next('route');
-
-  buf.fill(character);
-  res.set('Cache-Control', 'no-cache');
-  res.type('text/plain').send(buf);
-});
+app.get('/d/ping/:character', diagnostics.pingCharacter);
 
 app.use('/proxy', function(req, res, next) {
   res.set('Content-Security-Policy', [
