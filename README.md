@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/toolness/baseless.svg)](https://travis-ci.org/toolness/baseless)
+
 Currently this is just a server that can proxy all content
 from any website through a single origin, cache it for offline use,
 and allow users to activate the X-Ray Goggles on any page.
