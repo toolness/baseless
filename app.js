@@ -113,6 +113,7 @@ app.get('/archive/zip', function(req, res, next) {
   arch.pipe(res);
   exportStaticFiles({
     archiver: arch,
+    rootDir: urlObj.hostname + '/',
     url: url,
     ttl: ttl,
     linkPrefix: linkPrefix
