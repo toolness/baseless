@@ -3,6 +3,8 @@
 <link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" rel="stylesheet">
 <link rel="stylesheet" href="/vendor/makerstrap.min.css">
 <link rel="stylesheet" href="/vendor/font-awesome/css/font-awesome.css">
+<!-- DC CSS3 Buttons CSS -->
+<link type="text/css" rel="stylesheet" href="http://cdn.dcodes.net/2/css3_buttons/css/dc_button_styles.css" />
 <style>
 html, body, .browser {
   height: 100%;
@@ -14,7 +16,7 @@ html, body, .browser {
   display: -webkit-flex;
   align-items: center;
   -webkit-align-items: center;
-  background: #e3eaee; /* makerstrap @lightgrey */
+  background: #000000; /* makerstrap @lightgrey */
   padding: 10px 0 10px 10px;
 }
 
@@ -48,38 +50,48 @@ html, body, .browser {
   height: 100%;
   border: none;
 }
+body,td,th {
+	color: #CCC;
+	font-family: "Times New Roman", Times, serif;
+	font-size: 16px;
+}
+body {
+	background-image: url(vendor/webxray/dialog-common/images/HACK.gif);
+}
+h1 {
+	font-size: 24px;
+}
+h2 {
+	font-size: 16px;
+}
 </style>
-<title>Baseless Browser</title>
+<title>Circus</title>
+<!-- DC CSS3 Buttons Start -->
 <div class="browser">
   <div class="urlbar">
     <form action="/proxy">
-      <input spellcheck="false" type="text" name="url" class="form-control" placeholder="http://">
-      <button type="submit" class="btn btn-primary">
-        Go <i class="fa fa-chevron-right"></i>
+      <img src="vendor/webxray/X_logo.png" width="50" height="55"><strong><h1>Ripper</h1></strong>
+        <input spellcheck="false" type="text" name="url" class="form-control" placeholder="http://">
+      
+      <button type="submit" class="dc_c3b_large dc_button dc_c3b_red dc_c3b_input" value="Red">
+        Clone <i class="fa fa-chevron-right"></i>
       </button>
-
-      <!-- We're hiding the togetherJS button for now, it's not
-           particularly useful yet. -->
-      <button id="togetherjs" class="btn btn-default" title="Collaborate" style="display: none">
-        <i class="fa fa-user-plus"></i>
-        <span class="hidden-xs">Collaborate</span>
+      <button id="webxray" class="dc_c3b_large dc_button dc_c3b_input" value="Black" title="Goggles">
+       <i class="fa fa-code-fork"></i>
+              <span class="hidden-xs">xXx</span>
       </button>
-
-      <button id="webxray" class="btn btn-default" title="Goggles">
-        <i class="fa fa-code-fork"></i>
-        <span class="hidden-xs">Goggles</span>
-      </button>
-      <a id="spider" class="btn btn-default" href="/spider" target="_blank" title="Spider">
+      <a id="spider" class="dc_c3b_large dc_button dc_c3b_input" value="Black" href="/spider" target="_blank" title="Spider">
         <i class="fa fa-bug"></i>
         <span class="hidden-xs">Spider</span>
       </a>
-      <a class="btn btn-default" href="/about/" target="_blank" title="About">
+      <a class="dc_c3b_large dc_button dc_c3b_input" value="Black" href="/about/" target="_blank" title="About">
         <i class="fa fa-question"></i>
       </a>
     </form>
   </div>
   <div class="content"></div>
 </div>
+<!-- DC CSS3 Buttons End -->
 <script src="/js/bundle.js"></script>
 <script>
 var querystring = require('querystring');
